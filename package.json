@@ -1,0 +1,28 @@
+{
+  "name": "gasless",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:local-gsn": "node_modules/.bin/gsn start -n http://localhost:8545",
+    "start:ganache": "npx ganache-cli --networkId 1337 --chainId 1337"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sftwr-prjct-dev/gasless.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sftwr-prjct-dev/gasless/issues"
+  },
+  "homepage": "https://github.com/sftwr-prjct-dev/gasless#readme",
+  "dependencies": {
+    "@opengsn/gsn": "^2.1.0",
+    "@openzeppelin/contracts": "3.3.0",
+    "ganache-cli": "6.12.2",
+    "truffle-hdwallet-provider": "1.0.17"
+  }
+}
