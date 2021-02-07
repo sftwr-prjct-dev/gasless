@@ -4,9 +4,10 @@ const tokenContract = artifacts.require("TOEKN");
 const paymentManagerContract = artifacts.require("PaymentManager");
 const mintManagerContract = artifacts.require("MintManager");
 const tokenRouterContract = artifacts.require("TokenRouter");
+const {relay} = require("../env.json")
 
-const trustedForwarder = "0x24A634c219699F7c5d6E6a4dDb0cB9fAe425BBb0"
-const relayHub = "0xC3bD7e253B2309d391f68983e17Bfce69F4383F6"
+const trustedForwarder = relay.Forwarder
+const relayHub = relay.relayHub
 
 module.exports = async function (deployer) {
 
@@ -43,5 +44,5 @@ module.exports = async function (deployer) {
   await paymaster.setTarget(mintManager.address) // paymaster should allow gasless tx to mintManager
 
   
-  console.log({ paymaster: paymaster.address, factory: factory.address, TKNToken: token.address, paymentManager: paymentManager.address, swipToken: swip.address, mintManager: mintManager.address, tokenRouter: tokenRouter.address });
+  console.log(JSON.stringify({ paymaster: paymaster.address, factory: factory.address, TKNToken: token.address, paymentManager: paymentManager.address, swipToken: swip.address, mintManager: mintManager.address, tokenRouter: tokenRouter.address }));
 };
