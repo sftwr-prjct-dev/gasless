@@ -9,7 +9,8 @@
     "start": "next start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:local-gsn": "node_modules/.bin/gsn start -n http://localhost:8545",
-    "start:ganache": "npx ganache-cli --networkId 1337 --chainId 1337"
+    "start:ganache": "npx ganache-cli --networkId 1337 --chainId 1337",
+    "story": "node migrations/script.js"
   },
   "repository": {
     "type": "git",
