@@ -7,7 +7,7 @@ const tokenRouterContract = artifacts.require("TokenRouter");
 const {relay} = require("../env.json")
 
 const trustedForwarder = relay.Forwarder
-const relayHub = relay.relayHub
+const relayHub = relay.RelayHub
 
 module.exports = async function (deployer) {
 
@@ -22,7 +22,7 @@ module.exports = async function (deployer) {
 
   await deployer.deploy(paymentManagerContract)
   const paymentManager = await paymentManagerContract.deployed()
-  paymentManager.addNewAdminToken(token.address, tokenRouter.address, 2_505)
+  await paymentManager.addNewAdminToken(token.address, tokenRouter.address, 2_505, "Transfer Token")
 
   await deployer.deploy(factoryContract, trustedForwarder, paymentManager.address);
   const factory = await factoryContract.deployed();
