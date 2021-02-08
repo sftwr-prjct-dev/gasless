@@ -15,7 +15,7 @@ contract PaymentManager is  IPaymentManager {
     mapping(address => mapping(address => uint256)) public adminTokensFee; // maps token to functions to fee
     mapping(address => bool) public adminTokens;
 
-    event TokenUpdate(address indexed _token, address indexed _function, uint256 _fee);
+    event TokenUpdate(address indexed _token, address indexed _function, uint256 _fee, string _funtionName);
     event TokenRemoved(address indexed _token);
 
     constructor() public {
@@ -30,11 +30,11 @@ contract PaymentManager is  IPaymentManager {
     }
 
 
-    function addNewAdminToken(address _token, address _function, uint256 _fee) external override onlyOwner returns (bool success) {
+    function addNewAdminToken(address _token, address _function, uint256 _fee, string memory _funtionName) external override onlyOwner returns (bool success) {
         require(!adminTokens[_token], "Token already exist");
         adminTokens[_token] = true;
         adminTokensFee[_token][_function] = _fee;
-        emit TokenUpdate(_token, _function, _fee);
+        emit TokenUpdate(_token, _function, _fee, _funtionName);
         return true;
     }
     
@@ -49,10 +49,10 @@ contract PaymentManager is  IPaymentManager {
         return adminTokensFee[_token][_function];
     }
     
-    function setAdminTokenFee(address _token, address _function, uint256 _fee) external override onlyOwner returns (bool success) {
+    function setAdminTokenFee(address _token, address _function, uint256 _fee, string memory _funtionName) external override onlyOwner returns (bool success) {
         require(adminTokens[_token], "Token is not yet supported");
         adminTokensFee[_token][_function] = _fee;
-        emit TokenUpdate(_token, _function, _fee);
+        emit TokenUpdate(_token, _function, _fee, _funtionName);
         return true;
     }
 
