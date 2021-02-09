@@ -205,6 +205,27 @@ export default class ETHAPI {
     }
 
   }
+
+  async generateWallet({ setWalletState, method, cb }) {
+    const wallet = ethers.Wallet.createRandom()
+    cb({ phrase: wallet.mnemonic.phrase, address: wallet.address })
+    if(method === 'generating') {
+      setWalletState(prevState => {
+        return { ...prevState, generating: true, useLocal: true }
+      })
+    }
+  }
+
+  async createWallet({ phrase, passphrase }) {
+    const wallet = ethers.Wallet.fromMnemonic(phrase)
+    const encrypted = await wallet.encrypt(passphrase)
+    return encrypted
+  }
+
+  async openLocalWallet({ encryptedWallet, passphrase }) {
+    return ethers.Wallet.fromEncryptedJson(encryptedWallet, passphrase)
+    
+  }
 }
 
 function buildCreate2Address(creatorAddress, saltHex, byteCode) {

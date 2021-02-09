@@ -3,15 +3,16 @@ import { ethAPI } from "../scripts"
 export const zeroAddress = "0x0000000000000000000000000000000000000000"
 export const defaultToken = { address: zeroAddress, func: zeroAddress, fee: 0, funcName: "Send", tokenName: "ETH", tokenDecimal: "18" }
 
-export const handleConnectToWallet = ({ setAddress, setMainETHAddress, setTxs }) => async () => {
-    await ethAPI.connect()
-    if (!ethAPI.isConnected()) { return }
-    const ethAddress = await ethAPI.getAddress()
-    const gaslessAddress = await ethAPI.getGaslessWalletAddress(0)
-    setAddress(gaslessAddress)
-    setMainETHAddress(ethAddress)
-    const txs = await ethAPI.getTransactionCount()
-    setTxs(txs)
+export const handleConnectToWallet = ({ setAddress, setMainETHAddress, setTxs, setIsOpen }) => async () => {
+    setIsOpen(true)
+    // await ethAPI.connect()
+    // if (!ethAPI.isConnected()) { return }
+    // const ethAddress = await ethAPI.getAddress()
+    // const gaslessAddress = await ethAPI.getGaslessWalletAddress(0)
+    // setAddress(gaslessAddress)
+    // setMainETHAddress(ethAddress)
+    // const txs = await ethAPI.getTransactionCount()
+    // setTxs(txs)
 }
 
 export const getInitialDetails = async ({ address, setNetwork, setBalance, setSupportedTokensAndFees }) => {
@@ -64,4 +65,9 @@ export const handleGaslessSend = async (tokenAddress, func, receipientAddress, a
 export const watchBalance = (token, address, setBalance) => async () => {
     const bal = await ethAPI.getTokenBalance(token, address)
     setBalance(bal)
+}
+
+
+export const createWallet = () => {
+    
 }
