@@ -5,6 +5,7 @@ import Address from "../components/Address"
 import Balance from "../components/Balance"
 import ExecuteDisplay from "../components/ExecuteDisplay"
 import Network from "../components/Network"
+import Transactions from "../components/Transactions"
 import { defaultToken, getInitialDetails, handleConnectToWallet, handleSelectedCurrencyChanged, handleSelectedToken, watchBalance, zeroAddress } from "../handlers"
 import useWindowSize from '../hooks/useWindowSize'
 
@@ -17,6 +18,7 @@ export default function Dashboard() {
     const [supportedTokensAndFees, setSupportedTokensAndFees] = useState([defaultToken])
     const [selectedCurrency, setSelectedCurrency] = useState(defaultToken)
     const [currencyFuncs, setCurrencyFuncs] = useState([defaultToken])
+    const [txs, setTxs] = useState({})
 
     useEffect(() => {
         // get and set initial details after wallet connection
@@ -47,7 +49,7 @@ export default function Dashboard() {
         <div className="md:flex flex-wrap justify-center items-center h-screen w-full bg-light-gray overflow-y-scroll">
             <div className="flex flex-col justify-between h-screen w-full md:h-auto md:w-auto md:max-h-650 md:max-w-300 p-4 md:p-8 shadow-md rounded-md bg-transparent md:bg-thin-gray">
                 <DetailsDisplay
-                    handleConnectToWallet={handleConnectToWallet({setAddress, setMainETHAddress})}
+                    handleConnectToWallet={handleConnectToWallet({setAddress, setMainETHAddress, setTxs})}
                     address={address} value={value}
                     balance={balance}
                     selectedCurrency={selectedCurrency}
@@ -61,19 +63,7 @@ export default function Dashboard() {
                     mainETHAddress={mainETHAddress}
                 />
 
-                <div className="bg-dark-gray mt-4 p-2 pb-6 w-full rounded-md">
-                    <span className="text-dirt-white">Transactions</span>
-                    <div className="p-4 pb-0 h-64 md:h-32 overflow-y-scroll w-full">
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                        <div className="underline text-dirt-white mb-4 cursor-pointer w-full">0x0000000000000000000000000000000000000000</div>
-                    </div>
-                </div>
+                <Transactions txs={txs}/>
             </div>
         </div>
     )
