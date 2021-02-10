@@ -20,6 +20,8 @@ export default class ETHAPI {
   walletFactoryAddress;
   paymentManagerAddress;
   paymasterAddress;
+  isLocal;
+  localSigner;
 
   onboard() {
     if (!this.ob) {
@@ -50,23 +52,45 @@ export default class ETHAPI {
     return this.ob;
   }
 
-  async connect() {
-    const result = await this.onboard().walletSelect();
-    if (result) {
-      this.connected = await this.onboard().walletCheck();
+  async connect({ wallet, network, customEndpoint }) {
+    if(wallet) {
+      if(network !== 'custom') {
+        this.provider = new ethers.providers.JsonRpcProvider(`https://${network}.infura.io/v3/a9c2daa6167748c1ab6542469a583203`);
+      } else {
+        this.provider = new ethers.providers.JsonRpcProvider(customEndpoint);
+      }
+      this.localSigner = ethers.Wallet.fromMnemonic(wallet).connect(this.provider)
+      this.isLocal = true
+      this.connected = true
+      this.network = network === 'custom' ? 'unknown' : network
+      this.config = config[this.network]
+      this.walletFactoryAddress = this.config.contractAddresses.factory
+      this.paymentManagerAddress = this.config.contractAddresses.paymentManager
+      this.paymasterAddress = this.config.contractAddresses.paymaster
+    }else {
+      const result = await this.onboard().walletSelect();
+      if (result) {
+        this.connected = await this.onboard().walletCheck();
+      }
     }
   }
-
+  
   isConnected() {
     return !!this.provider && !!this.ob;
   }
-
-  getSigner() {
+  
+  getSigner() { 
+    if(this.isLocal) {
+      return this.localSigner;
+    }
     return this.provider.getSigner();
   }
 
   async getAddress() {
     if (this.connected) {
+      if (this.isLocal) {
+        return this.localSigner.getAddress();
+      }
       return this.getSigner().getAddress();
     }
   }
@@ -174,6 +198,69 @@ export default class ETHAPI {
 
   toBigNumber(number) {
     return ethers.utils.parseEther(number);
+  }
+
+  async getTransactionCount() {
+    const addr = await this.getAddress()
+    const availableTxs = []   
+    const network = this.provider.network
+    if(!network) {
+      return { chain: 'invalid', txs: availableTxs }
+    }
+    if (network.chainId === 1337) {
+      const currentBlock = await this.provider.getBlockNumber()
+      for (let i = currentBlock; i >= 0; --i) {
+        const txCountInBlock = await this.provider.getTransactionCount(addr, i)
+        if(txCountInBlock > 0) {
+          const blockTxs = await this.provider.getBlockWithTransactions(i)
+          if(blockTxs && blockTxs.transactions) {
+            if(blockTxs.transactions.length > 0) {
+              blockTxs.transactions.map(tx => {
+                if(addr.toLowerCase() === tx.from.toLowerCase()) {
+                  availableTxs.push(tx.hash)                
+                }
+              })
+            }
+          }
+        }
+      }
+      return { chain: 'local', txs: availableTxs.reverse() }
+
+    } else {
+      const availableTxs= []
+      const isMain = network.chainId === 1 ? 'api' : `api-${network.name}`
+      let response = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlist&address=${addr}&sort=asc&apikey=DQF8KC7VD26XFFF7J89CPBJRP78EU754VV`)
+      const { result } = await response.json()
+      result.map(tx => {
+          availableTxs.push(tx.hash)
+      })
+        
+      return { chain: network.name, txs: availableTxs.reverse() }
+    }
+  }
+
+  async generateWallet({ setWalletState, method, cb }) {
+    const wallet = ethers.Wallet.createRandom()
+    cb({ phrase: wallet.mnemonic.phrase, address: wallet.address })
+    if(method === 'generating') {
+      setWalletState(prevState => {
+        return { ...prevState, generating: true, useLocal: true }
+      })
+    }
+  }
+
+  async createWallet({ phrase, passphrase }) {
+    const wallet = ethers.Wallet.fromMnemonic(phrase)
+    const encrypted = await wallet.encrypt(passphrase)
+    return encrypted
+  }
+
+  async decryptLocalWallet({ encryptedWallet, passphrase }) {
+    return await ethers.Wallet.fromEncryptedJson(encryptedWallet, passphrase)
+  }
+
+  async connectWallet({ network, customEndpoint }) {
+    
   }
 }
 
