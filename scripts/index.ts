@@ -62,6 +62,7 @@ export default class ETHAPI {
       this.localSigner = ethers.Wallet.fromMnemonic(wallet).connect(this.provider)
       this.isLocal = true
       this.connected = true
+      this.network = network === 'custom' ? 'unknown' : network
       this.config = config[this.network]
       this.walletFactoryAddress = this.config.contractAddresses.factory
       this.paymentManagerAddress = this.config.contractAddresses.paymentManager
