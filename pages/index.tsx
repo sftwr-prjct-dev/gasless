@@ -82,6 +82,12 @@ export default function Dashboard() {
 const DetailsDisplay = ({address, balance, value, network, selectedCurrency, setSelectedCurrency, setIsOpen, options}) => {
     const { width } = useWindowSize()
     const isSmallScreen = width < 768
+    const tokens = {}
+    options = options.filter(option => {
+        const notPresent = !tokens[option.address]
+        tokens[option.address] = true
+        return notPresent
+    })
     return (
         <>
             <div className="flex flex-wrap relative">

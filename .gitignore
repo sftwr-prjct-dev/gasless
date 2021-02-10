@@ -3,3 +3,4 @@ build
 .next
 copy.env.json
 merged
+*.env.json
