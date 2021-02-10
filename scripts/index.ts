@@ -20,6 +20,8 @@ export default class ETHAPI {
   walletFactoryAddress;
   paymentManagerAddress;
   paymasterAddress;
+  isLocal;
+  localSigner;
 
   onboard() {
     if (!this.ob) {
@@ -50,23 +52,44 @@ export default class ETHAPI {
     return this.ob;
   }
 
-  async connect() {
-    const result = await this.onboard().walletSelect();
-    if (result) {
-      this.connected = await this.onboard().walletCheck();
+  async connect({ wallet, network, customEndpoint }) {
+    if(wallet) {
+      if(network !== 'custom') {
+        this.provider = new ethers.providers.JsonRpcProvider(`https://${network}.infura.io/v3/a9c2daa6167748c1ab6542469a583203`);
+      } else {
+        this.provider = new ethers.providers.JsonRpcProvider(customEndpoint);
+      }
+      this.localSigner = ethers.Wallet.fromMnemonic(wallet).connect(this.provider)
+      this.isLocal = true
+      this.connected = true
+      this.config = config[this.network]
+      this.walletFactoryAddress = this.config.contractAddresses.factory
+      this.paymentManagerAddress = this.config.contractAddresses.paymentManager
+      this.paymasterAddress = this.config.contractAddresses.paymaster
+    }else {
+      const result = await this.onboard().walletSelect();
+      if (result) {
+        this.connected = await this.onboard().walletCheck();
+      }
     }
   }
-
+  
   isConnected() {
     return !!this.provider && !!this.ob;
   }
-
-  getSigner() {
+  
+  getSigner() { 
+    if(this.isLocal) {
+      return this.localSigner;
+    }
     return this.provider.getSigner();
   }
 
   async getAddress() {
     if (this.connected) {
+      if (this.isLocal) {
+        return this.localSigner.getAddress();
+      }
       return this.getSigner().getAddress();
     }
   }
@@ -178,8 +201,11 @@ export default class ETHAPI {
 
   async getTransactionCount() {
     const addr = await this.getAddress()
-    const network = this.provider._network
-    const availableTxs = []    
+    const availableTxs = []   
+    const network = this.provider.network
+    if(!network) {
+      return { chain: 'invalid', txs: availableTxs }
+    }
     if (network.chainId === 1337) {
       const currentBlock = await this.provider.getBlockNumber()
       for (let i = currentBlock; i >= 0; --i) {
@@ -210,7 +236,6 @@ export default class ETHAPI {
         
       return { chain: network.name, txs: availableTxs.reverse() }
     }
-
   }
 
   async generateWallet({ setWalletState, method, cb }) {
@@ -229,8 +254,11 @@ export default class ETHAPI {
     return encrypted
   }
 
-  async openLocalWallet({ encryptedWallet, passphrase }) {
-    return ethers.Wallet.fromEncryptedJson(encryptedWallet, passphrase)
+  async decryptLocalWallet({ encryptedWallet, passphrase }) {
+    return await ethers.Wallet.fromEncryptedJson(encryptedWallet, passphrase)
+  }
+
+  async connectWallet({ network, customEndpoint }) {
     
   }
 }

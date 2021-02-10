@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const NewWallet = ({ wallet, ethAPI, setWalletState, setOpeningWallet }) => {
+const NewWallet = ({ wallet, ethAPI, setWalletState, setOpeningWallet, setSavedWallets }) => {
   const walletPhrase = wallet.phrase.split(" ")
   const [savedPhrase, setSavedPhrase] = useState('off')
   const [passphrase, setPassPhrase] = useState('')
@@ -28,21 +28,25 @@ const NewWallet = ({ wallet, ethAPI, setWalletState, setOpeningWallet }) => {
       setError('Passphrase must be the same')
     } else {
       setError('')
+      let savedWallets
       let result = await ethAPI.createWallet({ phrase: wallet.phrase, passphrase })
-      const gaslessWallets = window.localStorage.getItem('gasslessWallets')
       result = { walletName, result }
+      const gaslessWallets = window.localStorage.getItem('gaslessWallets')
       if(!gaslessWallets) {
-        window.localStorage.setItem('gaslessWallets', JSON.stringify([result]))
+        savedWallets = JSON.stringify([result])
+        window.localStorage.setItem('gaslessWallets', savedWallets)
+        
       } else {
-        const savedWallets = JSON.parse(gaslessWallets)
+        savedWallets = JSON.parse(gaslessWallets)
         savedWallets.push(result)
-        window.localStorage.setItem('gasslessWallets', JSON.stringify(savedWallets))
-
+        savedWallets = JSON.stringify(savedWallets)
+        window.localStorage.setItem('gaslessWallets', savedWallets)
       }
       setWalletState(prevState => {
         return {...prevState, generating: false, opening: true }
       })
-      setOpeningWallet(walletName)
+      setSavedWallets(JSON.parse(savedWallets))
+      setOpeningWallet({ name: walletName, encrypted: result.result })
     }
   }
 
@@ -66,11 +70,11 @@ const NewWallet = ({ wallet, ethAPI, setWalletState, setOpeningWallet }) => {
       </div>
       <div>
         <div className="text-left">
-          <label htmlFor="wallet-passphrase" className="text-sm">Enter Wallet passphrase</label>
-          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setPassPhrase })} placeholder="wallet name" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
+          <label htmlFor="wallet-password" className="text-sm">Enter a password</label>
+          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setPassPhrase })} placeholder="wallet password" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
         </div><div className="text-left">
-          <label htmlFor="wallet-passphrase" className="text-sm">Enter Wallet passphrase again</label>
-          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setConfirmPassPhrase })} placeholder="wallet name" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
+          <label htmlFor="wallet-password" className="text-sm">Enter password again</label>
+          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setConfirmPassPhrase })} placeholder="wallet password" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
         </div>
       </div>
       <div className="m-2">
