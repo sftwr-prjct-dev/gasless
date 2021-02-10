@@ -1,24 +1,25 @@
 import Onboard from "bnc-onboard";
 import { ethers } from "ethers";
-import contractWallet from "../build/contracts/WalletSpender.json";
-import contractToken from "../build/contracts/TOEKN.json";
-import contractPaymentManager from "../build/contracts/PaymentManager.json";
-import contractWalletFactory from "../build/contracts/WalletFactory.json";
-import tokenRouter from "../build/contracts/TokenRouter.json";
+import contractWallet from "../contract_assets/contracts/WalletSpender.json";
+import contractToken from "../contract_assets/contracts/TOEKN.json";
+import contractPaymentManager from "../contract_assets/contracts/PaymentManager.json";
+import contractWalletFactory from "../contract_assets/contracts/WalletFactory.json";
+import tokenRouter from "../contract_assets/contracts/TokenRouter.json";
 import config from "../env.json"
 const Gsn = require("@opengsn/gsn");
 
 const dappId = "f55de6cc-5d4a-4115-b773-f6dde3bbf817";
 const networkId = 1337;
 
-const walletFactoryAddress = config.contractAddresses.factory
-const paymentManagerAddress = config.contractAddresses.paymentManager
-const paymasterAddress = config.contractAddresses.paymaster
-
 export default class ETHAPI {
   provider;
   ob;
   connected;
+  network;
+  config;
+  walletFactoryAddress;
+  paymentManagerAddress;
+  paymasterAddress;
 
   onboard() {
     if (!this.ob) {
@@ -27,8 +28,14 @@ export default class ETHAPI {
         hideBranding: true,
         networkId,
         subscriptions: {
-          wallet: (wallet) => {
+          wallet: async (wallet) => {
             this.provider = new ethers.providers.Web3Provider(wallet.provider);
+            this.network = await this.getNetwork()
+            console.log(this.network)
+            this.config = config[this.network]
+            this.walletFactoryAddress = this.config.contractAddresses.factory
+            this.paymentManagerAddress = this.config.contractAddresses.paymentManager
+            this.paymasterAddress = this.config.contractAddresses.paymaster
           },
         },
         walletCheck: [
@@ -94,7 +101,7 @@ export default class ETHAPI {
     const address = await this.getAddress();
     const salt = calcSalt(address, index);
     const gaslessAddress = buildCreate2Address(
-      walletFactoryAddress,
+      this.walletFactoryAddress,
       salt,
       contractWallet.bytecode
     );
@@ -104,7 +111,7 @@ export default class ETHAPI {
   async getSupportedTokensAndFee() {
     const signer = await this.getSigner();
     const contract = getPaymentManagerContract(
-      paymentManagerAddress
+      this.paymentManagerAddress
     );
     const addedTokensFilter = contract.filters.TokenUpdate();
     const removedTokensFilter = contract.filters.TokenRemoved();
@@ -129,9 +136,9 @@ export default class ETHAPI {
     // privateKey && await gsnProvider.provider.addAccount(privateKey)
     // const gsnSigner = await gsnProvider.getSigner(address, privateKey)
     const gsnSigner = await gsnProvider.getSigner(address)
-    const walletFactory = getWalletFactoryContract(walletFactoryAddress)
+    const walletFactory = getWalletFactoryContract(this.walletFactoryAddress)
     const tx = walletFactory.connect(gsnSigner)
-    .gaslessTransferToken(tokenAddress, addressIndex, paymentManagerAddress, fee, func,  calcERC20TransferData(tokenAddress, receipientAddress, amount))
+    .gaslessTransferToken(tokenAddress, addressIndex, this.paymentManagerAddress, fee, func,  calcERC20TransferData(tokenAddress, receipientAddress, amount))
     console.log({tx})
   }
 
@@ -144,15 +151,15 @@ export default class ETHAPI {
     } else {
       console.log("using alternative")
       const Web3 = require("web3-providers-http");
-      web3 = new Web3(config.providerURL);
+      web3 = new Web3(this.config.providerURL);
     }
 
     const _gsnProvider = await Gsn.RelayProvider.newProvider({
       provider: web3,
       config: {
-        paymasterAddress,
+        paymasterAddress: this.paymasterAddress,
         verbose: false,
-        preferredRelays: config.preferredRelays,
+        preferredRelays: this.config.preferredRelays,
       },
     }).init();
 
