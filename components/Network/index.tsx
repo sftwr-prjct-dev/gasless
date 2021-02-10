@@ -1,7 +1,7 @@
 import Button from "../Button";
 import PingPing from "../PingPing";
 
-export default function Network({ network, handleConnectToWallet }) {
+export default function Network({ network, setIsOpen }) {
     let bgcolor, textcolor, btnText
     if(network !== ""){
         bgcolor = "bg-green-400"
@@ -16,7 +16,7 @@ export default function Network({ network, handleConnectToWallet }) {
     return (
         <div className="flex items-center absolute right-0 top-0">
             <Button
-                onClick={handleConnectToWallet}
+                onClick={setIsOpen}
                 text={`${btnText}`}
                 className={`${textcolor}`}
                 disabled={!!network}
