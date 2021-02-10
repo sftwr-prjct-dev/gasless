@@ -1,4 +1,5 @@
 node_modules
 build
-env.json
 .next
+copy.env.json
+merged
