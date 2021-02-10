@@ -18,8 +18,9 @@ export default function SwapTokenDisplay({ selectedFunction, balance, mainETHAdd
     }, [selectedFunction])
 
     const handleChange = (setter) => async (e) => {
-        const { value } = e.target
+        const { value, name } = e.target
         setter(value)
+        if(name === 'address')return
         if(!value || value === "0"){
             setSwapDetails(emptyDetails)
             return
@@ -64,6 +65,7 @@ export default function SwapTokenDisplay({ selectedFunction, balance, mainETHAdd
             <input
                 className=" bg-gray-400 h-10 mt-2 pl-4 text-dirty-white text-xl w-full"
                 onChange={handleChange(setSendAddress)}
+                name="address"
                 value={sendAddress}
                 placeholder="Enter an Ethereum Address" />
 

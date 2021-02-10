@@ -26,6 +26,7 @@ export default class ETHAPI {
   paymasterAddress;
   isLocal;
   localSigner;
+  customProviderURl;
 
   onboard() {
     if (!this.ob) {
@@ -60,13 +61,15 @@ export default class ETHAPI {
     if(wallet) {
       if(network !== 'custom') {
         this.provider = new ethers.providers.JsonRpcProvider(`https://${network}.infura.io/v3/a9c2daa6167748c1ab6542469a583203`);
+        this.customProviderURl = `https://${network}.infura.io/v3/a9c2daa6167748c1ab6542469a583203`
       } else {
         this.provider = new ethers.providers.JsonRpcProvider(customEndpoint);
+        this.customProviderURl = customEndpoint
       }
       this.localSigner = ethers.Wallet.fromMnemonic(wallet).connect(this.provider)
       this.isLocal = true
       this.connected = true
-      this.network = network === 'custom' ? 'unknown' : network
+      this.network = await this.getNetwork()
       this.config = config[this.network]
       this.walletFactoryAddress = this.config.contractAddresses.factory
       this.paymentManagerAddress = this.config.contractAddresses.paymentManager
@@ -160,7 +163,10 @@ export default class ETHAPI {
   }
 
   async sendGaslessTokenTx(tokenAddress, func, receipientAddress, amount, fee, addressIndex, address, privateKey="") {
-    const gsnProvider = await this.getGSNProvider()
+    const gsnProvider: any = await this.getGSNProvider()
+    if(this.customProviderURl){
+      await gsnProvider.provider.addAccount(this.localSigner.privateKey)
+    }
     // privateKey && await gsnProvider.provider.addAccount(privateKey)
     // const gsnSigner = await gsnProvider.getSigner(address, privateKey)
     const gsnSigner = await gsnProvider.getSigner(address)
@@ -171,7 +177,10 @@ export default class ETHAPI {
   }
   
   async sendGaslessSwapTx(tokenAddress, func, fee, addressIndex, address, calldata, privateKey="") {
-    const gsnProvider = await this.getGSNProvider()
+    const gsnProvider: any = await this.getGSNProvider()
+    if(this.customProviderURl){
+      await gsnProvider.provider.addAccount(this.localSigner.privateKey)
+    }
     const gsnSigner = await gsnProvider.getSigner(address)
     const walletFactory = getWalletFactoryContract(this.walletFactoryAddress)
     const tx = walletFactory.connect(gsnSigner)
@@ -182,13 +191,13 @@ export default class ETHAPI {
   async getGSNProvider() {
     let web3;
     const _win: any = window
-    if (_win.ethereum) {
+    if (!this.customProviderURl) {
       web3 = _win.ethereum
 
     } else {
       console.log("using alternative")
       const Web3 = require("web3-providers-http");
-      web3 = new Web3(this.config.providerURL);
+      web3 = new Web3(this.customProviderURl);
     }
 
     const _gsnProvider = await Gsn.RelayProvider.newProvider({
