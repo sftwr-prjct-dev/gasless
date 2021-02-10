@@ -42,3 +42,45 @@ export const CopyIcon = ({className}) =>
         <g>
         </g>
     </svg>
+
+
+export const SwapIcon = ({className}) => <svg className={className}  version="1.1" x="0" y="0" viewBox="0 0 384 384" ><g>
+<g xmlns="http://www.w3.org/2000/svg">
+	<g>
+		<g>
+			<polygon points="85.12,170.667 0,256 85.12,341.333 85.12,277.333 234.667,277.333 234.667,234.667 85.12,234.667    " fill="#fbf6f6" data-original="#000000"/>
+			<polygon points="384,128 298.88,42.667 298.88,106.667 149.333,106.667 149.333,149.333 298.88,149.333 298.88,213.333    " fill="#fbf6f6" data-original="#000000"/>
+		</g>
+	</g>
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+<g xmlns="http://www.w3.org/2000/svg">
+</g>
+</g></svg>

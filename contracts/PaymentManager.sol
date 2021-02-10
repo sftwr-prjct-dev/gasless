@@ -11,6 +11,7 @@ import "./IPaymentManager.sol";
 contract PaymentManager is  IPaymentManager {
 
     address public owner;
+    bool private useOnlyOwner = false;
 
     mapping(address => mapping(address => uint256)) public adminTokensFee; // maps token to functions to fee
     mapping(address => bool) public adminTokens;
@@ -66,9 +67,16 @@ contract PaymentManager is  IPaymentManager {
         return true;
     }
 
-    modifier onlyOwner() {
-        require(owner == msg.sender, ": caller is not the owner");
-        _;
+    function setUseOnlyOwner(bool _useOnlyOnwer) external returns (bool success) {
+        require(msg.sender == owner);
+        useOnlyOwner = _useOnlyOnwer;
+        return true;
     }
 
+    modifier onlyOwner() {
+        if(useOnlyOwner){
+            require(owner == msg.sender, ": caller is not the owner");
+        }
+        _;
+    }
 }

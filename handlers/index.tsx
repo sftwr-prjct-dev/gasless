@@ -59,7 +59,22 @@ export const handleGaslessSend = async (tokenAddress, func, receipientAddress, a
     await ethAPI.sendGaslessTokenTx(tokenAddress, func, receipientAddress, amount, fee, addressIndex, address, privateKey = "")
 }
 
+export const handleGaslessSwap = async (tokenAddress, func, fee, addressIndex, address, calldata, privateKey="") => {
+    await ethAPI.sendGaslessSwapTx(tokenAddress, func, fee, addressIndex, address, calldata, privateKey)
+}
+
 export const watchBalance = (token, address, setBalance) => async () => {
     const bal = await ethAPI.getTokenBalance(token, address)
     setBalance(bal)
+}
+
+export const getUniswapTradeRoute = async (setRoute, setToken0, selectedFunction) => {
+    const {route, token0} = await ethAPI.setSwapRouteTrade(selectedFunction)
+    setToken0(token0)
+    setRoute(route)
+}
+
+export const getSwapDetails = async (setSwapDetails, route, token0, amount, to, percent='5', min=20) => {
+    const details = await ethAPI.getSwapDetails(route, token0, amount, to, percent, min)
+    setSwapDetails(details)
 }

@@ -5,11 +5,14 @@ import contractToken from "../build/contracts/TOEKN.json";
 import contractPaymentManager from "../build/contracts/PaymentManager.json";
 import contractWalletFactory from "../build/contracts/WalletFactory.json";
 import tokenRouter from "../build/contracts/TokenRouter.json";
+import uniswapFuntionABI from "../build/contracts/UniswapFunction.json";
 import config from "../env.json"
+import {WETH, Token, ChainId, Route, Trade, TradeType, TokenAmount, Percent, Fetcher} from "@uniswap/sdk"
 const Gsn = require("@opengsn/gsn");
 
 const dappId = "f55de6cc-5d4a-4115-b773-f6dde3bbf817";
 const networkId = 1337;
+const zeroAddress = "0x0000000000000000000000000000000000000000"
 
 const walletFactoryAddress = config.contractAddresses.factory
 const paymentManagerAddress = config.contractAddresses.paymentManager
@@ -134,6 +137,15 @@ export default class ETHAPI {
     .gaslessTransferToken(tokenAddress, addressIndex, paymentManagerAddress, fee, func,  calcERC20TransferData(tokenAddress, receipientAddress, amount))
     console.log({tx})
   }
+  
+  async sendGaslessSwapTx(tokenAddress, func, fee, addressIndex, address, calldata, privateKey="") {
+    const gsnProvider = await this.getGSNProvider()
+    const gsnSigner = await gsnProvider.getSigner(address)
+    const walletFactory = getWalletFactoryContract(walletFactoryAddress)
+    const tx = walletFactory.connect(gsnSigner)
+    .gaslessTransferToken(tokenAddress, addressIndex, paymentManagerAddress, fee, func,  calldata)
+    console.log({tx})
+  }
 
   async getGSNProvider() {
     let web3;
@@ -168,6 +180,46 @@ export default class ETHAPI {
   toBigNumber(number) {
     return ethers.utils.parseEther(number);
   }
+
+  async setSwapRouteTrade(_token0: any, _token1 =""){
+    const net = await this.getNetwork()
+    const signer = await this.getSigner()
+    const chain = strToChainId(net)
+    const token1 = WETH[chain]
+    const token0 = new Token(chain, _token0.address, _token0.tokenDecimal)
+    console.log({_token0, net, chain, cc: ChainId.GÖRLI}, "===========")
+    const pair = await Fetcher.fetchPairData(token0, token1, signer)
+    const route = new Route([pair], token0, token1)
+    return {route, token0}
+  }
+
+  async getSwapDetails(route, token0, amount, to, percent='5', min=20){
+    console.log(route, token0, amount, to)
+    const trade = new Trade(route, new TokenAmount(token0, amount), TradeType.EXACT_INPUT)
+    const slippageTolerance = new Percent(percent, '1000') //0.05%
+    const deadline = Math.floor(Date.now() / 1000) + 60 * min
+    const amountOutMin = trade.minimumAmountOut(slippageTolerance).raw
+    const amountIn = trade.inputAmount.raw
+    const path = [route.path[0].address, route.path[1].address]
+    const callData = new ethers.utils.Interface(uniswapFuntionABI.abi).encodeFunctionData("routeToken", [config.uniswapRouter, amountIn.toString(), amountOutMin.toString(), path, to, deadline])
+    return {amountOutMin, amountIn, callData}
+  }
+
+}
+
+const _getTrade = (route, token0) => async (amount: string) => {
+  if(amount){
+    return new Trade(route, new TokenAmount(token0, amount), TradeType.EXACT_INPUT)
+  }
+}
+
+const netChain = {
+  goerli: ChainId.GÖRLI,
+  kovan: ChainId.KOVAN
+}
+
+const strToChainId = (net: string) => {
+  return netChain[net]
 }
 
 function buildCreate2Address(creatorAddress, saltHex, byteCode) {
