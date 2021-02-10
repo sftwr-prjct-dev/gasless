@@ -4,6 +4,7 @@ const tokenContract = artifacts.require("TOEKN");
 const paymentManagerContract = artifacts.require("PaymentManager");
 const mintManagerContract = artifacts.require("MintManager");
 const tokenRouterContract = artifacts.require("TokenRouter");
+const uniswapFunctionContract = artifacts.require("UniswapFunction");
 const {relay} = require("../env.json")
 
 const trustedForwarder = relay.Forwarder
@@ -19,10 +20,14 @@ module.exports = async function (deployer) {
 
   await deployer.deploy(tokenRouterContract)
   const tokenRouter = await tokenRouterContract.deployed()
+  
+  await deployer.deploy(uniswapFunctionContract)
+  const uniswapFunction = await uniswapFunctionContract.deployed()
 
   await deployer.deploy(paymentManagerContract)
   const paymentManager = await paymentManagerContract.deployed()
   await paymentManager.addNewAdminToken(token.address, tokenRouter.address, 2_505, "Transfer Token")
+  await paymentManager.setAdminTokenFee(token.address, uniswapFunction.address, 5_500, "Swap Token")
 
   await deployer.deploy(factoryContract, trustedForwarder, paymentManager.address);
   const factory = await factoryContract.deployed();
@@ -44,5 +49,5 @@ module.exports = async function (deployer) {
   await paymaster.setTarget(mintManager.address) // paymaster should allow gasless tx to mintManager
 
   
-  console.log(JSON.stringify({ paymaster: paymaster.address, factory: factory.address, TKNToken: token.address, paymentManager: paymentManager.address, swipToken: swip.address, mintManager: mintManager.address, tokenRouter: tokenRouter.address }));
+  console.log(JSON.stringify({ paymaster: paymaster.address, factory: factory.address, TKNToken: token.address, paymentManager: paymentManager.address, swipToken: swip.address, mintManager: mintManager.address, tokenRouter: tokenRouter.address, uniswapFunction: uniswapFunction.address }));
 };
