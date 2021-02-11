@@ -171,9 +171,10 @@ export default class ETHAPI {
     // const gsnSigner = await gsnProvider.getSigner(address, privateKey)
     const gsnSigner = await gsnProvider.getSigner(address)
     const walletFactory = getWalletFactoryContract(this.walletFactoryAddress)
-    const tx = walletFactory.connect(gsnSigner)
+    const tx = await walletFactory.connect(gsnSigner)
     .gaslessTransferToken(tokenAddress, addressIndex, this.paymentManagerAddress, fee, func,  calcERC20TransferData(tokenAddress, receipientAddress, amount))
     console.log({tx})
+    return {txHash: tx.hash, network: this.network}
   }
   
   async sendGaslessSwapTx(tokenAddress, func, fee, addressIndex, address, calldata, privateKey="") {
@@ -183,9 +184,10 @@ export default class ETHAPI {
     }
     const gsnSigner = await gsnProvider.getSigner(address)
     const walletFactory = getWalletFactoryContract(this.walletFactoryAddress)
-    const tx = walletFactory.connect(gsnSigner)
+    const tx = await walletFactory.connect(gsnSigner)
     .gaslessTransferToken(tokenAddress, addressIndex, this.paymentManagerAddress, fee, func,  calldata)
     console.log({tx})
+    return {txHash: tx.hash, network: this.network}
   }
 
   async getGSNProvider() {

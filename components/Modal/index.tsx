@@ -1,7 +1,7 @@
 
-const Modal = ({ children, setIsOpen }) => {
+const Modal = ({ children, setIsOpen, isOpen }) => {
   return (
-      <div className={`flex overflow-hidden fixed top-0 left-0 bg-transparent-bg w-full h-full flex-wrap justify-center items-center z-10 modal`}>
+      <div className={`${isOpen ? "flex" : "hidden"} overflow-hidden fixed top-0 left-0 bg-transparent-bg w-full h-full flex-wrap justify-center items-center z-10 modal`}>
         <div className="w-11/12 md:w-400 relative h-550 text-white rounded-lg bg-light-gray shadow-md p-4">
           <Cancel setIsOpen={setIsOpen}/>
           <div className="w-full mt-6 mb-2">

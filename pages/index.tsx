@@ -51,12 +51,9 @@ export default function Dashboard() {
 
     return (
         <div className="md:flex flex-wrap justify-center items-center h-screen w-full bg-light-gray overflow-y-scroll">
-            {
-                isOpen &&
-                    <Modal setIsOpen={setIsOpen}>
-                        <InAppWallet setTxs={setTxs} setIsOpen={setIsOpen} setAddress={setAddress} setMainETHAddress={setMainETHAddress}/>
-                    </Modal>
-            }
+            <Modal setIsOpen={setIsOpen} isOpen={isOpen}>
+                <InAppWallet setTxs={setTxs} setIsOpen={setIsOpen} setAddress={setAddress} setMainETHAddress={setMainETHAddress}/>
+            </Modal>
             <div className="flex flex-col justify-between h-screen w-full md:h-auto md:w-500 md:max-h-650 md:max-w-300 p-4 md:p-8 shadow-md rounded-md bg-transparent md:bg-thin-gray">
                 <DetailsDisplay
                     setIsOpen={setIsOpen}
@@ -80,6 +77,7 @@ export default function Dashboard() {
 
 const DetailsDisplay = ({address, balance, value, network, selectedCurrency, setSelectedCurrency, setIsOpen, options}) => {
     const { width } = useWindowSize()
+    const [copied, setCopied] = useState(false)
     const isSmallScreen = width < 768
     const tokens = {}
     options = options.filter(option => {
@@ -87,6 +85,11 @@ const DetailsDisplay = ({address, balance, value, network, selectedCurrency, set
         tokens[option.address] = true
         return notPresent
     })
+
+    const handleCopy = () => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 500)
+    }
     return (
         <>
             <div className="flex flex-wrap relative">
@@ -94,8 +97,8 @@ const DetailsDisplay = ({address, balance, value, network, selectedCurrency, set
                 <Network network={network} setIsOpen={setIsOpen} />
                 <Balance balance={balance} selected={selectedCurrency} onSelect={setSelectedCurrency} options={options} />
             </div>
-            <CopyToClipboard text={address}>
-                <Address address={address} />
+            <CopyToClipboard text={address} onCopy={handleCopy}>
+                <Address address={address} copied={copied} />
             </CopyToClipboard>
         </>
     )
