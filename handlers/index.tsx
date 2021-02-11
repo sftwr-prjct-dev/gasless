@@ -63,11 +63,13 @@ export const handleSelectedCurrencyChanged = async ({ supportedTokensAndFees, se
 }
 
 export const handleGaslessSend = async (tokenAddress, func, receipientAddress, amount, fee, addressIndex, address, privateKey = "") => {
-    await ethAPI.sendGaslessTokenTx(tokenAddress, func, receipientAddress, amount, fee, addressIndex, address, privateKey = "")
+    const tx = await ethAPI.sendGaslessTokenTx(tokenAddress, func, receipientAddress, amount, fee, addressIndex, address, privateKey = "")
+    return tx
 }
 
 export const handleGaslessSwap = async (tokenAddress, func, fee, addressIndex, address, calldata, privateKey="") => {
-    await ethAPI.sendGaslessSwapTx(tokenAddress, func, fee, addressIndex, address, calldata, privateKey)
+    const tx = await ethAPI.sendGaslessSwapTx(tokenAddress, func, fee, addressIndex, address, calldata, privateKey)
+    return tx
 }
 
 export const watchBalance = (token, address, setBalance) => async () => {
