@@ -248,17 +248,27 @@ export default class ETHAPI {
       return { chain: 'local', txs: availableTxs.reverse() }
 
     } else {
-      const availableTxs= []
-      const isMain = network.chainId === 1 ? 'api' : `api-${network.name}`
-      let response = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlist&address=${gaslessAddress}&sort=asc&apikey=DQF8KC7VD26XFFF7J89CPBJRP78EU754VV`)
-      const { result } = await response.json()
-      result.map(tx => {
+      let availableTxs= []
+      let allTxs = []
+      const isMain = network.chainId === 1 ? 'api' : `api-${network.name}`     
+      
+      for (let i = 1; i<4; i++) {
+        const response = await getTxs(i, gaslessAddress, isMain)
+        allTxs = [...allTxs, ...response]
+      }
+
+      
+      allTxs.map(tx => {
+        if(!availableTxs.includes(tx.hash)) {
           availableTxs.push(tx.hash)
+        }
       })
-        
+      console.log({ availableTxs })
+      
       return { chain: network.name, txs: availableTxs.reverse() }
     }
   }
+
 
   async generateWallet({ setWalletState, method, cb }) {
     const wallet = ethers.Wallet.createRandom()
@@ -354,6 +364,31 @@ function getWalletFactoryContract(address) {
 
 const calcERC20TransferData = (tokenAddress, to, value) => {
     return (new ethers.utils.Interface(tokenRouter.abi)).encodeFunctionData("routeToken", [ tokenAddress, to, value ]);
+}
+
+const getTxs = async (stage: number, addr: string, isMain: string) => {
+  const etherscanAPI = 'DQF8KC7VD26XFFF7J89CPBJRP78EU754VV'
+  let response = []
+  if (stage === 1) {
+    let normalTxs = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlist&address=${addr}&sort=asc&apikey=${etherscanAPI}`)
+    const { result } = await normalTxs.json()
+    console.log({ normal: result})
+    response = result
+  } 
+  if (stage === 2) {
+    const internalTxs = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlistinternal&address=${addr}=0&endblock=latest&apikey=${etherscanAPI}`)
+    const { result } = await internalTxs.json()
+    console.log({ internal: result})
+    response = result
+  }
+  if(stage === 3) {
+    const erc20Transfers = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=tokentx&address=${addr}&startblock=0&endblock=latest&sort=asc&apikey=${etherscanAPI}`)
+    const { result } = await erc20Transfers.json()
+    console.log({ erc: result })
+    response = result
+  }
+  
+  return response
 }
 
 export const ethAPI = new ETHAPI();
