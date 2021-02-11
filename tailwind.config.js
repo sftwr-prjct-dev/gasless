@@ -16,6 +16,9 @@ module.exports = {
       maxHeight: {
         modal: 'calc(100vh - 4rem)',
       },
+      minWidth: {
+        500: '500px',
+      },
       width: {
         300: '300px',
         500: '500px',

@@ -57,7 +57,7 @@ export default function Dashboard() {
                         <InAppWallet setTxs={setTxs} setIsOpen={setIsOpen} setAddress={setAddress} setMainETHAddress={setMainETHAddress}/>
                     </Modal>
             }
-            <div className="flex flex-col justify-between h-screen w-full md:h-auto md:w-auto md:max-h-650 md:max-w-300 p-4 md:p-8 shadow-md rounded-md bg-transparent md:bg-thin-gray">
+            <div className="flex flex-col justify-between h-screen w-full md:h-auto md:w-500 md:max-h-650 md:max-w-300 p-4 md:p-8 shadow-md rounded-md bg-transparent md:bg-thin-gray">
                 <DetailsDisplay
                     // handleConnectToWallet={handleConnectToWallet({ setAddress, setMainETHAddress, setTxs, setIsOpen })}
                     setIsOpen={setIsOpen}
