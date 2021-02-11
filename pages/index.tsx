@@ -8,7 +8,7 @@ import InAppWallet from "../components/InAppWallet";
 import Modal from "../components/Modal";
 import Network from "../components/Network"
 import Transactions from "../components/Transactions"
-import { defaultToken, getInitialDetails, handleConnectToWallet, handleSelectedCurrencyChanged, handleSelectedToken, watchBalance, zeroAddress } from "../handlers"
+import { defaultToken, getInitialDetails, handleSelectedCurrencyChanged, handleSelectedToken, watchBalance, zeroAddress } from "../handlers"
 import useWindowSize from '../hooks/useWindowSize'
 
 export default function Dashboard() {
@@ -59,7 +59,6 @@ export default function Dashboard() {
             }
             <div className="flex flex-col justify-between h-screen w-full md:h-auto md:w-500 md:max-h-650 md:max-w-300 p-4 md:p-8 shadow-md rounded-md bg-transparent md:bg-thin-gray">
                 <DetailsDisplay
-                    // handleConnectToWallet={handleConnectToWallet({ setAddress, setMainETHAddress, setTxs, setIsOpen })}
                     setIsOpen={setIsOpen}
                     address={address} value={value}
                     balance={balance}

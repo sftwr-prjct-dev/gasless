@@ -64,23 +64,37 @@ const OpenWallet = ({ ethAPI, toOpen, setIsOpen, setTxs, setAddress, setMainETHA
       setIsOpen(false)
   }
 
+  const labelClassM = "text-sm inline-block w-full text-left opacity-50 mt-3"
+  const inputClass = "border-none outline-none focus:outline-none w-full h-10 pl-2 mt-1 text-dirt-white rounded"
+
   return(
-    <div>
-      <p className="text-sm">Opening Wallet "{toOpen.name}"</p>
+    <>
+      <p className="text-xl">Open Wallet: "{toOpen.name}"</p>
+      <div>
+        <div className="mt-4 flex justify-center items-center">
+          <div className={`${stage === 1 ? 'text-white bg-gray-600' : null} flex items-center text-xs justify-center border-2 p-1 h-6 w-6 rounded-full`}>1</div>
+          <div className="border-t border-white opacity-75 w-24"></div>
+          <div className={`${stage === 2 ? 'text-white bg-gray-600' : null} flex items-center text-xs justify-center border-2 p-1 h-6 w-6 rounded-full`}>2</div>
+        </div>
+        <div className="flex justify-between mx-auto w-48 px-3">
+          <div className="flex items-center text-xs justify-center italic text-green-500 p-1">decrypt</div>
+          <div className="flex items-center text-xs justify-center italic text-green-500 p-1">finish</div>
+        </div>
+      </div>
       {
-        loading && <p className="text-green-600 italic text-xs">Fetching wallet...</p>
+        loading && <p className="text-green-600 italic text-xs w-full">Fetching wallet...</p>
       }
       {
-        errorMessage && <p className="text-red-600 text-xs">{errorMessage}</p>
+        errorMessage && <p className="text-red-600 text-xs w-full">{errorMessage}</p>
       }
       <div>
         { stage === 1 && 
           <form onSubmit={(e) => decryptWallet({ e, cb: setWallet })}>
-            <label htmlFor="wallet-passphrase" className="text-xs text-left">Passphrase:</label>
-            <input type="password" name="password" disabled={loading} placeholder="wallet passphrase" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
-            <div className="flex justify-center">
-              <button onClick={() => setWalletState({ generating: false, opening: false })} className="border border-gray-500 hover:border-gray-600 hover:text-gray-600 py-2 px-3 m-2 mt-0 text-gray-500 rounded-md">Cancel</button>
-              <button disabled={loading} type="submit" className="bg-gray-600 py-2 px-3 m-2 mt-0 text-white rounded-md">Next</button>
+            <label htmlFor="wallet-passphrase" className={labelClassM}>Passphrase:</label>
+            <input type="password" name="password" disabled={loading} placeholder="wallet passphrase" className={inputClass}/>
+            <div className="flex mt-6 justify-between">
+              <button onClick={() => setWalletState({ generating: false, opening: false })} className="border border-gray-500 hover:border-gray-600 hover:text-gray-600 w-24 h-12 text-gray-500 rounded-md">Cancel</button>
+              <button disabled={loading} type="submit" className="bg-gray-600 w-24 h-12 text-white rounded-md">Next</button>
             </div>        
           </form>
         }
@@ -88,7 +102,7 @@ const OpenWallet = ({ ethAPI, toOpen, setIsOpen, setTxs, setAddress, setMainETHA
           
           stage === 2 &&
           <div className="m-1">
-            <select onChange={selectNetwork} defaultValue="kovan" className="border p-2">
+            <select onChange={selectNetwork} defaultValue="kovan" className={`${inputClass} border p-2`}>
               <option value="kovan" className="p-2 hover:bg-gray-600 hover:text-white">Ethereum (Kovan)</option>
               <option value="goerli" className="p-2 hover:bg-gray-600 hover:text-white">Ethereum (Goerli)</option>
               <option value="custom" className="p-2 hover:bg-gray-600 hover:text-white italic">Custom...</option>
@@ -96,26 +110,18 @@ const OpenWallet = ({ ethAPI, toOpen, setIsOpen, setTxs, setAddress, setMainETHA
             {
               isCustom &&
               <div className="m-1">
-                <label htmlFor="wallet-passphrase" className="text-xs text-left">Custom Node Endpoint:</label>
-                <input onChange={setCustomNetwork} placeholder="custom node url" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
+                <label htmlFor="wallet-passphrase" className={labelClassM}>Custom Node Endpoint:</label>
+                <input onChange={setCustomNetwork} placeholder="custom node url" className={inputClass}/>
               </div>
             }
-            <div className="m-2">
-              <button onClick={() => setStage(stage-1)} className="border border-gray-500 hover:border-gray-600 hover:text-gray-600 py-2 px-3 m-2 mt-0 text-gray-500 rounded-md">Back</button>
-              <button onClick={loadNetwork} type="submit" className="bg-gray-600 py-2 px-3 m-2 mt-0 text-white rounded-md">Continue</button>
+            <div className="flex mt-6 justify-between">
+              <button onClick={() => setStage(stage-1)} className="border border-gray-500 hover:border-gray-600 hover:text-gray-600 w-24 h-12 text-gray-500 rounded-md">Back</button>
+              <button onClick={loadNetwork} type="submit" className="bg-gray-600 w-24 h-12 mt-0 text-white rounded-md">Continue</button>
             </div>
           </div>
         }
-        <div className="mt-1 flex justify-around">
-          <div className="flex items-center text-xs justify-center italic text-green-500 p-1">decrypt</div>
-          <div className="flex items-center text-xs justify-center italic text-green-500 p-1">finish</div>
-        </div>
-        <div className="mt-0 flex justify-around">
-          <div className={`${stage === 1 ? 'text-white bg-gray-600' : null} flex items-center text-xs justify-center border-2 p-1 h-6 w-6 rounded-full`}>1</div>
-          <div className={`${stage === 2 ? 'text-white bg-gray-600' : null} flex items-center text-xs justify-center border-2 p-1 h-6 w-6 rounded-full`}>2</div>
-        </div>
       </div>
-    </div>
+    </>
   )
 }
 
