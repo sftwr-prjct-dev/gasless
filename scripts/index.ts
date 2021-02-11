@@ -222,8 +222,7 @@ export default class ETHAPI {
     return ethers.utils.parseEther(number);
   }
 
-  async getTransactionCount() {
-    const addr = await this.getAddress()
+  async getTransactionCount(gaslessAddress: string) {
     const availableTxs = []   
     const network = this.provider.network
     if(!network) {
@@ -232,13 +231,13 @@ export default class ETHAPI {
     if (network.chainId === 1337) {
       const currentBlock = await this.provider.getBlockNumber()
       for (let i = currentBlock; i >= 0; --i) {
-        const txCountInBlock = await this.provider.getTransactionCount(addr, i)
+        const txCountInBlock = await this.provider.getTransactionCount(gaslessAddress, i)
         if(txCountInBlock > 0) {
           const blockTxs = await this.provider.getBlockWithTransactions(i)
           if(blockTxs && blockTxs.transactions) {
             if(blockTxs.transactions.length > 0) {
               blockTxs.transactions.map(tx => {
-                if(addr.toLowerCase() === tx.from.toLowerCase()) {
+                if(gaslessAddress.toLowerCase() === tx.from.toLowerCase()) {
                   availableTxs.push(tx.hash)                
                 }
               })
@@ -251,7 +250,7 @@ export default class ETHAPI {
     } else {
       const availableTxs= []
       const isMain = network.chainId === 1 ? 'api' : `api-${network.name}`
-      let response = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlist&address=${addr}&sort=asc&apikey=DQF8KC7VD26XFFF7J89CPBJRP78EU754VV`)
+      let response = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlist&address=${gaslessAddress}&sort=asc&apikey=DQF8KC7VD26XFFF7J89CPBJRP78EU754VV`)
       const { result } = await response.json()
       result.map(tx => {
           availableTxs.push(tx.hash)
@@ -279,10 +278,6 @@ export default class ETHAPI {
 
   async decryptLocalWallet({ encryptedWallet, passphrase }) {
     return await ethers.Wallet.fromEncryptedJson(encryptedWallet, passphrase)
-  }
-
-  async connectWallet({ network, customEndpoint }) {
-    
   }
 
   async setSwapRouteTrade(_token0: any, _token1 =""){
