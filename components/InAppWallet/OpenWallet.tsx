@@ -19,7 +19,6 @@ const OpenWallet = ({ ethAPI, toOpen, setIsOpen, setTxs, setAddress, setMainETHA
         const decrypted = await ethAPI.decryptLocalWallet({ encryptedWallet: toOpen.encrypted, passphrase: e.target.password.value })
         setErrorMessage('')
         setLoading(true)
-        // cb(`${decrypted.mnemonic.phrase}`)
         cb(decrypted.mnemonic.phrase)
         setLoading(false)
         setStage(2)
@@ -91,6 +90,7 @@ const OpenWallet = ({ ethAPI, toOpen, setIsOpen, setTxs, setAddress, setMainETHA
           <div className="m-1">
             <select onChange={selectNetwork} defaultValue="kovan" className="border p-2">
               <option value="kovan" className="p-2 hover:bg-gray-600 hover:text-white">Ethereum (Kovan)</option>
+              <option value="goerli" className="p-2 hover:bg-gray-600 hover:text-white">Ethereum (Goerli)</option>
               <option value="custom" className="p-2 hover:bg-gray-600 hover:text-white italic">Custom...</option>
             </select>
             {

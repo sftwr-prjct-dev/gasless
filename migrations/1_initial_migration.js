@@ -5,12 +5,13 @@ const paymentManagerContract = artifacts.require("PaymentManager");
 const mintManagerContract = artifacts.require("MintManager");
 const tokenRouterContract = artifacts.require("TokenRouter");
 const uniswapFunctionContract = artifacts.require("UniswapFunction");
-const {relay} = require("../env.json")
+const config = require("../env.json")
 
-const trustedForwarder = relay.Forwarder
-const relayHub = relay.RelayHub
 
-module.exports = async function (deployer) {
+module.exports = async function (deployer, network) {
+  let isLocal = network === 'development' ? 'unknown' : network
+  const trustedForwarder = config[isLocal].relay.Forwarder
+  const relayHub = config[isLocal].relay.RelayHub
 
   await deployer.deploy(paymasterContract);
   const paymaster = await paymasterContract.deployed();

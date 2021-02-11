@@ -14,7 +14,7 @@ export const handleConnectToWallet = async ({ setAddress, setMainETHAddress, set
     const gaslessAddress = await ethAPI.getGaslessWalletAddress(0)
     setAddress(gaslessAddress)
     setMainETHAddress(ethAddress)
-    const txs = await ethAPI.getTransactionCount()
+    const txs = await ethAPI.getTransactionCount(gaslessAddress)
     setTxs(txs)
     setIsOpen(false)
 }
