@@ -15,6 +15,14 @@ const testnetTokens = {
     {
       name: "CHAINLINK", address: "0xa36085f69e2889c224210f603d836748e7dc0088"
     }
+  ],
+  "kovan": [
+    {
+      name: "TTKN", address: "0xe17639e0907d1764f565e73a6f14b836432fb55d"
+    },
+    {
+      name: "CHAINLINK", address: "0xa36085f69e2889c224210f603d836748e7dc0088"
+    }
   ]
 }
 
@@ -46,10 +54,10 @@ module.exports = async function (deployer, network) {
   console.log('deployed paymentManager at', paymentManager.address)
   
   for (let token of testnetTokens[network]) {
-    await paymentManager.addNewAdminToken(token.address, tokenRouter.address, 2_505, `Transfer ${token.name}`)
+    let admin = await paymentManager.addNewAdminToken(token.address, tokenRouter.address, 2_505, `Transfer ${token.name}`)
     console.log(`added new admin token for ${token.name} - ${admin.address}`)
     
-    await paymentManager.setAdminTokenFee(token.address, uniswapFunction.address, 5_500, `Swap ${token.name}`)
+    admin = await paymentManager.setAdminTokenFee(token.address, uniswapFunction.address, 5_500, `Swap ${token.name}`)
     console.log(`uniswap admin token fee set for ${token.name} - ${admin.address}`)
   }
 
