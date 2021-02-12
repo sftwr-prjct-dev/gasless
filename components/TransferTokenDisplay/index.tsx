@@ -76,7 +76,7 @@ export default function TrasferTokenDisplay({selectedFunction, balance, mainETHA
 
                     <div className="w-full mt-4">
                         <label className="text-dirty-white w-full block">Amount</label>
-                        <div className="flex flex-wrap mt-2 h-10 overflow-x-scroll">
+                        <div className="flex flex-wrap mt-2 h-10">
                             <input
                                 type="number"
                                 className="bg-gray-400 w-7/12 h-full pr-4 text-dirty-white text-right text-xl"
@@ -85,7 +85,7 @@ export default function TrasferTokenDisplay({selectedFunction, balance, mainETHA
                                 placeholder="Amount" />
                             <div className="text-dirty-white h-full relative w-5/12 leading-none">
                                 <div className="w-auto absolute top-0 left-0 ml-4">Total</div>
-                                <div className="text-sm absolute bottom-0 left-0 ml-4 w-auto mt-auto whitespace-no-wrap overflow-x-scroll">
+                                <div className="text-sm absolute bottom-0 left-0 ml-4 w-auto mt-auto whitespace-no-wrap">
                                     {`${_total} ${selectedFunction.tokenName}`}
                                 </div>
                             </div>
