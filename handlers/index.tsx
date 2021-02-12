@@ -91,3 +91,16 @@ export const getSwapDetails = async (setSwapDetails, route, token0, amount, to, 
     const details = await ethAPI.getSwapDetails(route, token0, amount, to, percent, min)
     setSwapDetails(details)
 }
+
+export const getOneInchData = async (fromTokenAddress, toTokenAddress, amount, fromAddress, slippage=1) => {
+    const baseUrl = "https://api.1inch.exchange/v2.0"
+    const spender = "0x111111125434b319222cdbf8c261674adb56f3ae"
+    const approveData = (await (await fetch(`${baseUrl}/approve/calldata?amount=${amount}&tokenAddress=${toTokenAddress}`)).json()).data
+    const spendData = (await (await fetch(`${baseUrl}/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTokenAddress}&amount=${amount}&fromAddress=${fromAddress}&slippage=${slippage}`)).json()).data
+    return {spender, approveData, spendData}
+}
+
+export const gasless1InchSwap = async (fromTokenAddress, _spender, _approveData, spendData) => {
+    console.log({fromTokenAddress, _spender, _approveData, spendData})
+    return {network:"kovan", txHash: ""}
+}

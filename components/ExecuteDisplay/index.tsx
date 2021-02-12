@@ -3,10 +3,17 @@ import { defaultToken } from "../../handlers"
 import SwapTokenDisplay from "../SwapTokenDisplay"
 import TrasferTokenDisplay from "../TransferTokenDisplay"
 
-export default function ExecuteDisplay({ currencyFuncs, balance, mainETHAddress }) {
+export default function ExecuteDisplay({ currencyFuncs, balance, mainETHAddress, gaslessAddress }) {
     const [selectedFunction, setSelectedFunction] = useState(defaultToken)
     useEffect(() => {
-        setSelectedFunction(currencyFuncs[0])
+        const f =  currencyFuncs.filter(cf => cf.funcName.toLowerCase().startsWith("swap"))[0]
+        if(f){
+            const _f = {...f}
+            _f.funcName = "Swap (1inch)"
+            currencyFuncs.push(_f)
+            setSelectedFunction(currencyFuncs[0])
+        }
+        
     }, [currencyFuncs])
 
     const handleSelectedFunc = (e) => {
@@ -20,9 +27,9 @@ export default function ExecuteDisplay({ currencyFuncs, balance, mainETHAddress 
     return (
         <div className="bg-dark-gray mt-4 p-2 w-full rounded-md relative">
             <select value={selectedFunction.func} onChange={handleSelectedFunc} className="text-dirt-white bg-transparent border-none outline-none">
-                {currencyFuncs.map(cf => <option key={cf.func} value={cf.func} >{`${cf.funcName} (Fee: ${(Number(cf.fee) / 10 ** Number(cf.tokenDecimal)).toFixed(Number(cf.tokenDecimal))} ${cf.tokenName})`}</option>)}
+                {currencyFuncs.map((cf, index) => <option key={`${cf.func}${index}`} value={cf.func} >{`${cf.funcName} (Fee: ${(Number(cf.fee) / 10 ** Number(cf.tokenDecimal)).toFixed(Number(cf.tokenDecimal))} ${cf.tokenName})`}</option>)}
             </select>
-            <Display selectedFunction={selectedFunction} balance={balance} mainETHAddress={mainETHAddress} />
+            <Display selectedFunction={selectedFunction} balance={balance} mainETHAddress={mainETHAddress} gaslessAddress={gaslessAddress} />
         </div>
     )
 }
@@ -31,6 +38,7 @@ export default function ExecuteDisplay({ currencyFuncs, balance, mainETHAddress 
 const displays = {
     "transfer": TrasferTokenDisplay,
     "swap": SwapTokenDisplay,
+    "OneInch": SwapTokenDisplay
 }
 
 const getDisplay = (selectedFunctionName: string) => {

@@ -68,6 +68,7 @@ export default function Dashboard() {
                     currencyFuncs={currencyFuncs}
                     balance={balance}
                     mainETHAddress={mainETHAddress}
+                    gaslessAddress={address}
                 />
                 <Transactions txs={txs}/>
             </div>
