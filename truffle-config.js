@@ -18,9 +18,9 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
-//
+const HDWalletProvider = require('truffle-hdwallet-provider');
+const infuraKey = "vBE5Q3AtXuqJNU9XWCb6ajgN8fQHXjty";
+const mnemonic = "health welcome spin neutral update deer curtain van asthma clean palm regular"
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
@@ -46,6 +46,16 @@ module.exports = {
      host: "127.0.0.1",     // Localhost (default: none)
      port: 8545,            // Standard Ethereum port (default: none)
      network_id: "1337",       // Any network (default: none)
+    },
+    kovan: {
+     provider: function() {
+      return new HDWalletProvider(mnemonic, "https://kovan.infura.io/v3/6f1dd85996514e938d494542a3ce1c91")
+    },
+    network_id: "42",
+    // websockets: true,
+    skipDryRun: true,
+    confirmations: 0,
+    timeoutBlocks: 200,
     },
     // Another network with more advanced options...
     // advanced: {
@@ -86,8 +96,8 @@ module.exports = {
       docker: false,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
        optimizer: {
-         enabled: false,
-         runs: 200
+         enabled: true,
+         runs: 1000000
        },
       //  evmVersion: "byzantium"
       }
