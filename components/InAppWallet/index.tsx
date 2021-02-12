@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import New from './New'
 import OpenWallet from './OpenWallet'
 import { ethAPI } from "../../scripts"
+import { handleConnectToWallet } from '../../handlers'
+
 
 const InAppWallet = ({ setIsOpen, setAddress, setMainETHAddress, setTxs }) => {
   const [walletState, setWalletState] = useState({ useLocal: false, generating: false, saving: false, opening: false })
@@ -23,11 +25,15 @@ const InAppWallet = ({ setIsOpen, setAddress, setMainETHAddress, setTxs }) => {
 
   const getSavedWallets = () => {
     if(savedWallets) {
-      return savedWallets.map(w => {
-        return <button key={w.walletName} onClick={() => {openOne({ name: w.walletName, encrypted: w.result })}} className="bg-gray-700 text-white p-3 px-5 mb-2 rounded text-sm">{w.walletName}</button>
-      })
+      return (
+        <div className="grid-cols-3 grid gap-2 p-2 overflow-y-scroll h-full w-full">
+          {savedWallets.map(w => {
+        return <button key={w.walletName} onClick={() => {openOne({ name: w.walletName, encrypted: w.result })}} className="bg-white text-dirt-white h-10 opacity-75 rounded text-sm">{w.walletName}</button>
+      })}
+        </div>
+      )
     } else {
-      return <p className="text-gray-500 italic">(no saved wallets found)</p>
+      return <p className="text-white italic">(no saved wallets found)</p>
     }
   }
 
@@ -59,25 +65,19 @@ const InAppWallet = ({ setIsOpen, setAddress, setMainETHAddress, setTxs }) => {
         />
       }
       {
-        !walletState.generating && !walletState.opening && <>
-          <div className="border border-gray-700 mb-2 pb-3 rounded">
-            <p className="text-sm p-3">Load Existing</p>
-            <div className="flex justify-around flex-wrap">
+        !walletState.generating && !walletState.opening &&
+        <div className="h-350 flex flex-col justify-between">
+          <div className="h-3/10 flex items-center justify-center bg-blue-500 border border-blue-400 rounded">
             {
               getSavedWallets()  
             }
-            </div>
           </div>
-          <button onClick={() => ethAPI.generateWallet({ setWalletState, method: 'generating', cb: setWallet})} className="bg-gray-700 text-white p-3 mb-2 rounded text-sm">Create New</button>
-          <button onClick={connectBrowser} className="bg-gray-700 text-white p-3 rounded text-sm">Connect Browser Wallet (Metamask etc)</button>
-        </>
+          <button onClick={() => ethAPI.generateWallet({ setWalletState, method: 'generating', cb: setWallet})} className="text-white h-3/10 w-full bg-purple-500 rounded">Create New</button>
+          <button onClick={connectBrowser} className="bg-green-600 text-white w-full h-3/10 rounded">Connect Browser Wallet</button>
+        </div>
       }
     </div>
   )
 }
-
-
-import { GetStaticProps } from 'next'
-import { handleConnectToWallet } from '../../handlers'
 
 export default InAppWallet

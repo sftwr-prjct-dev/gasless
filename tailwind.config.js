@@ -10,7 +10,11 @@ module.exports = {
       },
       height: {
         480: '480px',
+        400: '400px',
+        450: '450px',
+        350: '350px',
         650: '650px',
+        '3/10': '30%',
         "3.5": '3.5rem',
       },
       maxHeight: {
@@ -21,6 +25,9 @@ module.exports = {
       },
       width: {
         300: '300px',
+        350: '350px',
+        400: '400px',
+        450: '450px',
         500: '500px',
         550: '550px',
         600: '600px',
@@ -32,7 +39,7 @@ module.exports = {
         "dark-gray": 'rgb(40,40,40)',
         "dirty-white": 'rgb(123,123,123)',
         "dirt-white": 'rgb(112,112,112)',
-        "transparent-bg": "rgba(0,0,0,0.7)",
+        "transparent-bg": "rgba(0,0,0,0.3)",
       },
       zIndex: {
         1: '1',

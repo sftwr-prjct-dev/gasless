@@ -50,44 +50,46 @@ const NewWallet = ({ wallet, ethAPI, setWalletState, setOpeningWallet, setSavedW
     }
   }
 
+  const labelClass = "text-sm inline-block w-full text-left opacity-50"
+  const labelClassM = "text-sm inline-block w-full text-left opacity-50 mt-3"
+  const inputClass = "border-none outline-none focus:outline-none w-full h-10 pl-2 mt-1 text-dirt-white rounded"
+
   return(
-    <div className="text-center">
+    <>
+      <label htmlFor="wallet-name" className={`${labelClass}`}>Wallet Name</label>
+      <input onChange={(e) => createWalletMethod({ e, cb: setWalletName })} placeholder="wallet name" className={inputClass}/>
       
-      <div>
-        <label htmlFor="wallet-name" className="text-sm">Wallet Name</label>
-        <input onChange={(e) => createWalletMethod({ e, cb: setWalletName })} placeholder="wallet name" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
-      </div>
-      
-      <p className="text-sm">Passphrase</p>
-      <div className="flex justify-center flex-wrap p4 border border-gray-700 rounded py-2">
+      <p className={`${labelClassM}`}>Passphrase</p>
+      <div className=" grid grid-cols-3 md:grid-cols-4 gap-1 rounded">
         {
           walletPhrase.map(( phrase: string, index: number) => {
             return(
-              <span key={phrase} className="p-2 m-1 bg-gray-600 text-white text-sm rounded-md">{`${index + 1}. ${phrase}`}</span>
+              <span key={phrase} className="border border-gray-600 h-10 flex justify-center opacity-75 items-center text-white text-sm rounded">{`${index + 1}. ${phrase}`}</span>
             )
           })
         }
       </div>
       <div>
         <div className="text-left">
-          <label htmlFor="wallet-password" className="text-sm">Enter a password</label>
-          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setPassPhrase })} placeholder="wallet password" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
+          <label htmlFor="wallet-password" className={`${labelClassM}`}>Enter a password</label>
+          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setPassPhrase })} placeholder="wallet password" className={inputClass}/>
         </div><div className="text-left">
-          <label htmlFor="wallet-password" className="text-sm">Enter password again</label>
-          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setConfirmPassPhrase })} placeholder="wallet password" className="border border-gray-600 p-2 m-2 ml-0 mt-1 rounded"/>
+          <label htmlFor="wallet-password" className={`${labelClassM}`}>Enter password again</label>
+          <input type="password" onChange={(e) => createWalletMethod({ e, cb: setConfirmPassPhrase })} placeholder="wallet password" className={inputClass}/>
         </div>
       </div>
-      <div className="m-2">
+      <div className="mt-4 w-full flex items-center">
         <input onChange={(e) => createWalletMethod({ e, cb: setSavedPhrase })} type="radio" />
-        <small className="ml-1">I have saved the wallet</small>
+        <small className="ml-1">I have saved the wallet passphrase</small>
       </div>
-      <div className="m-2">
-        <button className="bg-gray-600 text-white text-sm p-2 rounded-md" onClick={createWallet}>Create Wallet</button>
+      <div className="mt-1">
+        {
+          errorMessage && <p className="text-red-600 text-xs">{errorMessage}</p>
+        }
+        <button className="bg-gray-600 w-full mt-1 h-12 text-white rounded-md" onClick={createWallet}>Create Wallet</button>
       </div>
-      {
-        errorMessage && <p className="text-red-600 text-xs">{errorMessage}</p>
-      }      
-    </div>
+            
+    </>
   )
 }
 
