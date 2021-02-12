@@ -104,7 +104,7 @@ const OpenWallet = ({ ethAPI, toOpen, setIsOpen, setTxs, setAddress, setMainETHA
           <div className="m-1">
             <select onChange={selectNetwork} defaultValue="kovan" className={`${inputClass} border p-2`}>
               <option value="kovan" className="p-2 hover:bg-gray-600 hover:text-white">Ethereum (Kovan)</option>
-              <option value="goerli" className="p-2 hover:bg-gray-600 hover:text-white">Ethereum (Goerli)</option>
+              {/* <option value="goerli" className="p-2 hover:bg-gray-600 hover:text-white">Ethereum (Goerli)</option> */}
               <option value="custom" className="p-2 hover:bg-gray-600 hover:text-white italic">Custom...</option>
             </select>
             {

@@ -29,10 +29,10 @@ export default function ExecuteDisplay({ currencyFuncs, balance, mainETHAddress 
 
 
 const displays = {
-    "transfer token": TrasferTokenDisplay,
-    "swap token": SwapTokenDisplay,
+    "transfer": TrasferTokenDisplay,
+    "swap": SwapTokenDisplay,
 }
 
 const getDisplay = (selectedFunctionName: string) => {
-    return displays[selectedFunctionName.toLowerCase()] || (() => <div className="w-full h-56"></div>)
+    return displays[selectedFunctionName.toLowerCase().split(" ")[0]] || (() => <div className="w-full h-56"></div>)
 }
