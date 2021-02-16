@@ -23,6 +23,26 @@ const testnetTokens = {
     {
       name: "CHAINLINK", address: "0xa36085f69e2889c224210f603d836748e7dc0088"
     }
+  ],
+  "binance": [
+    {
+      name: "BUSD", address: "0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee", fee: "10000000000000000"
+    },
+    {
+      name: "LINK", address: "0x84b9b910527ad5c03a9ca831909e21e236ea7b06", fee: "500000000000000"
+    },
+    {
+      name: "DAI", address: "0xEC5dCb5Dbf4B114C9d0F65BcCAb49EC54F6A0867", fee: "10000000000000000"
+    },
+    {
+      name: "XRP", address: "0xa83575490D7df4E2F47b7D38ef351a2722cA45b9", fee: "200000000000000"
+    },
+    {
+      name: "ETH", address: "0xd66c6B4F0be8CE5b39D52E0Fd1344c389929B378", fee: "300000000000000"
+    },
+    {
+      name: "BTCB", address: "0x6ce8dA28E2f864420840cF74474eFf5fD80E65B8", fee: "1000000000000"
+    },
   ]
 }
 
@@ -33,6 +53,7 @@ module.exports = async function (deployer, network) {
   const relayHub = config[isLocal].relay.RelayHub
   
   console.log(`Using ${network}`)
+  // if(1===1)return
   await deployer.deploy(paymasterContract);
   const paymaster = await paymasterContract.deployed();
 
@@ -54,10 +75,10 @@ module.exports = async function (deployer, network) {
   console.log('deployed paymentManager at', paymentManager.address)
   
   for (let token of testnetTokens[network]) {
-    let admin = await paymentManager.addNewAdminToken(token.address, tokenRouter.address, 2_505, `Transfer ${token.name}`)
+    let admin = await paymentManager.addNewAdminToken(token.address, tokenRouter.address, token.fee, `Transfer ${token.name}`)
     console.log(`added new admin token for ${token.name} - ${admin.address}`)
     
-    admin = await paymentManager.setAdminTokenFee(token.address, uniswapFunction.address, 5_500, `Swap ${token.name}`)
+    admin = await paymentManager.setAdminTokenFee(token.address, uniswapFunction.address, token.fee, `Swap ${token.name}`)
     console.log(`uniswap admin token fee set for ${token.name} - ${admin.address}`)
   }
 

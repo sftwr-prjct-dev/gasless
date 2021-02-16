@@ -57,6 +57,16 @@ module.exports = {
     confirmations: 0,
     timeoutBlocks: 200,
     },
+    binance: {
+      provider: function() {
+       return new HDWalletProvider(mnemonic, "https://data-seed-prebsc-2-s2.binance.org:8545/")
+     },
+     network_id: "97",
+     // websockets: true,
+    //  skipDryRun: true,
+     confirmations: 0,
+     timeoutBlocks: 200,
+     },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
