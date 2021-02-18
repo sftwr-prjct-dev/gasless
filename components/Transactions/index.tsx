@@ -1,5 +1,8 @@
+import { getExplorerBase } from "../../scripts"
+
 const Transactions = ({ txs }) => {
-  const isMain = txs.chain === 'homestead' ? '' : `${txs.chain}.`
+  let baseUrl = getExplorerBase(txs.chain, txs.chainID)
+
 
   const formatTxView = (str) => {
     return `${str.slice(0, 18)}.....${str.slice(50)}`
@@ -14,7 +17,7 @@ const Transactions = ({ txs }) => {
           formatTxView(tx)
           return <div key={tx} className="underline text-dirt-white mb-4 cursor-pointer w-full">
             {
-              txs.chain !== 'local' ? <a target="_blank" href={`https://${isMain}etherscan.io/tx/${tx}`}>{formatTxView(tx)}</a> : formatTxView(tx)
+              txs.chain !== 'local' ? <a target="_blank" href={`https://${baseUrl}/tx/${tx}`}>{formatTxView(tx)}</a> : formatTxView(tx)
             }
         </div>
         }) : null

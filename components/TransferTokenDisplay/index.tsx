@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { handleGaslessSend } from "../../handlers"
+import { getExplorerBase } from "../../scripts"
 import Modal from "../Modal"
 
 export default function TrasferTokenDisplay({selectedFunction, balance, mainETHAddress}){
@@ -7,8 +8,8 @@ export default function TrasferTokenDisplay({selectedFunction, balance, mainETHA
     const [sendAddress, setSendAddress] = useState("")
     const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
-    const [tx, setTx] = useState({network:"", txHash: ""})
-    const {network, txHash} = tx
+    const [tx, setTx] = useState({network:"", txHash: "", chainID: ""})
+    const {network, txHash, chainID} = tx
 
     const handleChange = (setter) => (e) => {
         const { value } = e.target
@@ -16,7 +17,7 @@ export default function TrasferTokenDisplay({selectedFunction, balance, mainETHA
     }
 
     const closeModal = () => {
-        setTx({network:"", txHash:""})
+        setTx({network:"", txHash:"", chainID:""})
         setIsOpen(false)
     }
 
@@ -37,8 +38,8 @@ export default function TrasferTokenDisplay({selectedFunction, balance, mainETHA
                     selectedFunction.address,
                     selectedFunction.func,
                     sendAddress,
-                    sendAmountValue,
-                    feeValue,
+                    String(sendAmountValue),
+                    String(feeValue),
                     0,
                     mainETHAddress,
                     ""
@@ -56,12 +57,14 @@ export default function TrasferTokenDisplay({selectedFunction, balance, mainETHA
         
     }
 
+    const networkBase = getExplorerBase(network, chainID)
+
     return (
         <>
             <Modal setIsOpen={closeModal} isOpen={isOpen}>
                 <div className="w-full h-32 text-center">
                     <div className="text-xl opacity-75">Transaction successfully Sent</div>
-                    <a href={`https://${network === 'homestead' ? '' : network+'.'}etherscan.io/tx/${txHash}`} target="_blank">
+                    <a href={`https://${networkBase}/tx/${txHash}`} target="_blank">
                         <button className="bg-white text-dirt-white rounded-md h-12 w-11/12 mt-6">View on Etherscan</button>
                     </a>
                 </div>

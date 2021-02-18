@@ -27,13 +27,19 @@ export default function ExecuteDisplay({ currencyFuncs, balance, mainETHAddress,
     return (
         <div className="bg-dark-gray mt-4 p-2 w-full rounded-md relative">
             <select value={selectedFunction.func} onChange={handleSelectedFunc} className="text-dirt-white bg-transparent border-none outline-none">
-                {currencyFuncs.map((cf, index) => <option key={`${cf.func}${index}`} value={cf.func} >{`${cf.funcName} (Fee: ${(Number(cf.fee) / 10 ** Number(cf.tokenDecimal)).toFixed(Number(cf.tokenDecimal))} ${cf.tokenName})`}</option>)}
+                {currencyFuncs.map((cf, index) => {
+                    return <option key={`${cf.func}${index}`} value={cf.func} >{`${cf.funcName} (Fee: ${(Number(cf.fee) / 10 ** Number(cf.tokenDecimal)).toFixed(getToFixedDecimal(Number(cf.tokenDecimal)))} ${cf.tokenName})`}</option>
+                })}
             </select>
             <Display selectedFunction={selectedFunction} balance={balance} mainETHAddress={mainETHAddress} gaslessAddress={gaslessAddress} />
         </div>
     )
 }
 
+const getToFixedDecimal = (tokenDecimal: number) => {
+    const fixedDecimal = tokenDecimal >= 8 ? 8 : tokenDecimal
+    return fixedDecimal
+}
 
 const displays = {
     "transfer": TrasferTokenDisplay,
