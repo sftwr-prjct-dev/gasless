@@ -6,9 +6,9 @@ import contractPaymentManager from "../contract_assets/contracts/PaymentManager.
 import contractWalletFactory from "../contract_assets/contracts/WalletFactory.json";
 import tokenRouter from "../contract_assets/contracts/TokenRouter.json";
 import uniswapFuntionABI from "../contract_assets/contracts/UniswapFunction.json";
-
+import pairABI from './UniswapV2Pair.json'
 import config from "../env.json"
-import {WETH, Token, ChainId, Route, Trade, TradeType, TokenAmount, Percent, Fetcher} from "@uniswap/sdk"
+import {WETH, Token, ChainId, Route, Trade, TradeType, TokenAmount, Percent, Fetcher, Pair} from "@uniswap/sdk"
 const Gsn = require("@opengsn/gsn");
 
 const dappId = "f55de6cc-5d4a-4115-b773-f6dde3bbf817";
@@ -27,6 +27,7 @@ export default class ETHAPI {
   isLocal;
   localSigner;
   customProviderURl;
+  chainID;
 
   onboard() {
     if (!this.ob) {
@@ -37,8 +38,9 @@ export default class ETHAPI {
         subscriptions: {
           wallet: async (wallet) => {
             this.provider = new ethers.providers.Web3Provider(wallet.provider);
-            this.network = await this.getNetwork()
-            console.log(this.network)
+            this.chainID = await this.getChainID()
+            this.network = this.chainID === 97 ? "binance" : await this._getNetwork()
+            console.log("====>network====> ",(await (await this.provider).getNetwork()), this.network)
             this.config = config[this.network]
             this.walletFactoryAddress = this.config.contractAddresses.factory
             this.paymentManagerAddress = this.config.contractAddresses.paymentManager
@@ -69,7 +71,9 @@ export default class ETHAPI {
       this.localSigner = ethers.Wallet.fromMnemonic(wallet).connect(this.provider)
       this.isLocal = true
       this.connected = true
-      this.network = await this.getNetwork()
+      const chainID = await this.getChainID()
+      console.log("chainID", chainID)
+      this.network = chainID === 97 ? 'binance' :  await this._getNetwork()
       this.config = config[this.network]
       this.walletFactoryAddress = this.config.contractAddresses.factory
       this.paymentManagerAddress = this.config.contractAddresses.paymentManager
@@ -171,10 +175,11 @@ export default class ETHAPI {
     // const gsnSigner = await gsnProvider.getSigner(address, privateKey)
     const gsnSigner = await gsnProvider.getSigner(address)
     const walletFactory = getWalletFactoryContract(this.walletFactoryAddress)
-    const tx = await walletFactory.connect(gsnSigner)
-    .gaslessTransferToken(tokenAddress, addressIndex, this.paymentManagerAddress, fee, func,  calcERC20TransferData(tokenAddress, receipientAddress, amount))
+    const tx = await walletFactory.connect(gsnSigner) //
+    .gaslessTransferToken(tokenAddress, addressIndex, this.paymentManagerAddress, fee, func,  calcERC20TransferData(tokenAddress, receipientAddress, amount), {gasPrice: "20000000000", gasLimit: "2000000"})
+    // await tx.wait()
     console.log({tx})
-    return {txHash: tx.hash, network: this.network}
+    return {txHash: tx.hash, network: this.network, chainID: this.chainID}
   }
   
   async sendGaslessSwapTx(tokenAddress, func, fee, addressIndex, address, calldata, privateKey="") {
@@ -185,9 +190,9 @@ export default class ETHAPI {
     const gsnSigner = await gsnProvider.getSigner(address)
     const walletFactory = getWalletFactoryContract(this.walletFactoryAddress)
     const tx = await walletFactory.connect(gsnSigner)
-    .gaslessTransferToken(tokenAddress, addressIndex, this.paymentManagerAddress, fee, func,  calldata)
+    .gaslessTransferToken(tokenAddress, addressIndex, this.paymentManagerAddress, fee, func,  calldata, {gasPrice: "20000000000", gasLimit: "2000000"})
     console.log({tx})
-    return {txHash: tx.hash, network: this.network}
+    return {txHash: tx.hash, network: this.network, chainID: this.chainID}
   }
 
   async getGSNProvider() {
@@ -206,8 +211,9 @@ export default class ETHAPI {
       provider: web3,
       config: {
         paymasterAddress: this.paymasterAddress,
-        verbose: false,
         preferredRelays: this.config.preferredRelays,
+        // minGasPrice: "20000000000",
+        // gasPriceFactorPercent: 10
       },
     }).init();
 
@@ -216,8 +222,17 @@ export default class ETHAPI {
   }
 
   async getNetwork() {
-    const net = (await (await this.provider).getNetwork()).name;
-    return net;
+    return this.network
+  }
+  
+  async _getNetwork() {
+    this.network = (await (await this.provider).getNetwork()).name;
+    return this.network;
+  }
+  
+  async getChainID() {
+    const cid = (await (await this.provider).getNetwork()).chainId;
+    return cid;
   }
 
   toBigNumber(number) {
@@ -255,7 +270,7 @@ export default class ETHAPI {
       const isMain = network.chainId === 1 ? 'api' : `api-${network.name}`     
       
       for (let i = 1; i<4; i++) {
-        const response = await getTxs(i, gaslessAddress, isMain)
+        const response = await getTxs(i, gaslessAddress, isMain, this.chainID)
         allTxs = [...allTxs, ...response]
       }
 
@@ -267,7 +282,7 @@ export default class ETHAPI {
       })
       console.log({ availableTxs })
       
-      return { chain: network.name, txs: availableTxs.reverse() }
+      return { chain: network.name, chainID: this.chainID, txs: availableTxs.reverse() }
     }
   }
 
@@ -296,10 +311,21 @@ export default class ETHAPI {
     const net = await this.getNetwork()
     const signer = await this.getSigner()
     const chain = strToChainId(net)
-    const token1 = WETH[chain]
+    const wbnbAddr = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
+    const token1 = chain === 97
+      ? new Token(chain, wbnbAddr, 18)
+      : WETH[chain]
     const token0 = new Token(chain, _token0.address, _token0.tokenDecimal)
+    let [tokenA, tokenB] = token0.sortsBefore(token1) ? [token0, token1] : [token1, token0]
     console.log({_token0, net, chain, cc: ChainId.GÖRLI}, "===========")
-    const pair = await Fetcher.fetchPairData(token0, token1, signer)
+
+    const _pair = getPairAddress(token0, token1)
+    const pairContract = new ethers.Contract(_pair, pairABI.abi, signer);
+    const reserves = await pairContract.getReserves()
+    console.log({reserves})
+    const pair = chain === 97
+      ? new Pair(new TokenAmount(tokenA, reserves[0].toString()), new TokenAmount(tokenB,reserves[1].toString()))
+      : await Fetcher.fetchPairData(token0, token1, signer)
     const route = new Route([pair], token0, token1)
     return {route, token0}
   }
@@ -325,7 +351,8 @@ const _getTrade = (route, token0) => async (amount: string) => {
 
 const netChain = {
   goerli: ChainId.GÖRLI,
-  kovan: ChainId.KOVAN
+  kovan: ChainId.KOVAN,
+  binance: 97
 }
 
 const strToChainId = (net: string) => {
@@ -349,6 +376,23 @@ function calcSalt(sender, index) {
   );
 }
 
+const getPairAddress = (tokenA, tokenB) => {
+  [tokenA, tokenB] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
+  console.log(tokenA, tokenB)
+  const addr = ethers.utils.getCreate2Address(
+      "0x79323B74082e2E85493de93a16343b22e0EF20C6",
+      calcSaltEncodePacked(tokenA.address, tokenB.address),
+      "0xc6e62827f984fdebf683694fa4b7c4b12160000bea0804362b0ae37a6b9d4aaf"
+  )
+  return addr
+}
+
+function calcSaltEncodePacked(tokenA, tokenB) {
+  return ethers.utils.keccak256(
+    ethers.utils.concat([ethers.utils.arrayify(tokenA), ethers.utils.arrayify(tokenB)])
+  );
+}
+
 function getTokenContract(tokenAddress) {
   const tokenContract = new ethers.Contract(tokenAddress, contractToken.abi);
   return tokenContract;
@@ -368,29 +412,45 @@ const calcERC20TransferData = (tokenAddress, to, value) => {
     return (new ethers.utils.Interface(tokenRouter.abi)).encodeFunctionData("routeToken", [ tokenAddress, to, value ]);
 }
 
-const getTxs = async (stage: number, addr: string, isMain: string) => {
-  const etherscanAPI = 'DQF8KC7VD26XFFF7J89CPBJRP78EU754VV'
+const getTxs = async (stage: number, addr: string, isMain: string, chainID: number) => {
+  const etherscanAPI = chainID === 97 ? '' : 'DQF8KC7VD26XFFF7J89CPBJRP78EU754VV'
+  const baseUrl = chainID === 97 ? 'api-testnet.bscscan.com' : `${isMain}.etherscan.io`
   let response = []
   if (stage === 1) {
-    let normalTxs = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlist&address=${addr}&sort=asc&apikey=${etherscanAPI}`)
+    let normalTxs = await fetch(`https://${baseUrl}/api?module=account&action=txlist&address=${addr}&sort=asc&apikey=${etherscanAPI}`)
     const { result } = await normalTxs.json()
     console.log({ normal: result})
     response = result
   } 
   if (stage === 2) {
-    const internalTxs = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=txlistinternal&address=${addr}=0&endblock=latest&apikey=${etherscanAPI}`)
+    const internalTxs = await fetch(`https://${baseUrl}/api?module=account&action=txlistinternal&address=${addr}=0&endblock=latest&apikey=${etherscanAPI}`)
     const { result } = await internalTxs.json()
     console.log({ internal: result})
     response = result
   }
   if(stage === 3) {
-    const erc20Transfers = await fetch(`https://${isMain}.etherscan.io/api?module=account&action=tokentx&address=${addr}&startblock=0&endblock=latest&sort=asc&apikey=${etherscanAPI}`)
+    const erc20Transfers = await fetch(`https://${baseUrl}/api?module=account&action=tokentx&address=${addr}&startblock=0&endblock=latest&sort=asc&apikey=${etherscanAPI}`)
     const { result } = await erc20Transfers.json()
     console.log({ erc: result })
     response = result
   }
   
   return response
+}
+
+const etherscan = 'etherscan.io'
+const bscscan = 'bscscan.com'
+const networkExplorer = {
+  97: `testnet.${bscscan}`,
+  kovan: `kovan.${etherscan}`,
+  goerli: `kovan.${etherscan}`,
+  ropsten: `kovan.${etherscan}`,
+  binance: `kovan.${etherscan}`,
+  homestead: `${etherscan}`,
+}
+
+export const getExplorerBase = (network: string, chainID: string) => {
+  return networkExplorer[chainID] || networkExplorer[network]
 }
 
 export const ethAPI = new ETHAPI();

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { getUniswapTradeRoute, getSwapDetails, handleGaslessSwap } from "../../handlers"
+import { getExplorerBase } from "../../scripts"
 import {SwapIcon} from "../../SVGIcons"
 import Modal from "../Modal"
 
@@ -15,8 +16,8 @@ export default function SwapTokenDisplay({ selectedFunction, balance, mainETHAdd
 
     const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
-    const [tx, setTx] = useState({network:"", txHash: ""})
-    const {network, txHash} = tx
+    const [tx, setTx] = useState({network:"", txHash: "", chainID: ""})
+    const {network, txHash, chainID} = tx
 
     useEffect(() => {
         getUniswapTradeRoute(setRoute, setToken0, selectedFunction)
@@ -51,7 +52,7 @@ export default function SwapTokenDisplay({ selectedFunction, balance, mainETHAdd
     const _total = (_fee + _sendAmount).toFixed(_tokenDecimal > 6 ? 6 : _tokenDecimal)
 
     const closeModal = () => {
-        setTx({network:"", txHash:""})
+        setTx({network:"", txHash:"", chainID: ""})
         setIsOpen(false)
     }
 
@@ -63,7 +64,7 @@ export default function SwapTokenDisplay({ selectedFunction, balance, mainETHAdd
                 const tx = await handleGaslessSwap(
                     selectedFunction.address,
                     selectedFunction.func,
-                    feeValue,
+                    String(feeValue),
                     0,
                     mainETHAddress,
                     callData,
@@ -87,7 +88,7 @@ export default function SwapTokenDisplay({ selectedFunction, balance, mainETHAdd
             <Modal setIsOpen={closeModal} isOpen={isOpen}>
                 <div className="w-full h-32 text-center">
                     <div className="text-xl opacity-75">Transaction successfully Sent</div>
-                    <a href={`https://${network === 'homestead' ? '' : network+'.'}etherscan.io/tx/${txHash}`} target="_blank">
+                    <a href={`https://${getExplorerBase(network, chainID)}/tx/${txHash}`} target="_blank">
                         <button className="bg-white text-dirt-white rounded-md h-12 w-11/12 mt-6">View on Etherscan</button>
                     </a>
                 </div>
