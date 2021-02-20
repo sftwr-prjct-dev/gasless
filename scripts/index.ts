@@ -6,9 +6,9 @@ import contractPaymentManager from "../contract_assets/contracts/PaymentManager.
 import contractWalletFactory from "../contract_assets/contracts/WalletFactory.json";
 import tokenRouter from "../contract_assets/contracts/TokenRouter.json";
 import uniswapFuntionABI from "../contract_assets/contracts/UniswapFunction.json";
-
+import pairABI from './UniswapV2Pair.json'
 import config from "../env.json"
-import {WETH, Token, ChainId, Route, Trade, TradeType, TokenAmount, Percent, Fetcher} from "@uniswap/sdk"
+import {WETH, Token, ChainId, Route, Trade, TradeType, TokenAmount, Percent, Fetcher, Pair} from "@uniswap/sdk"
 const Gsn = require("@opengsn/gsn");
 
 const dappId = "f55de6cc-5d4a-4115-b773-f6dde3bbf817";
@@ -311,10 +311,21 @@ export default class ETHAPI {
     const net = await this.getNetwork()
     const signer = await this.getSigner()
     const chain = strToChainId(net)
-    const token1 = WETH[chain]
+    const wbnbAddr = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
+    const token1 = chain === 97
+      ? new Token(chain, wbnbAddr, 18)
+      : WETH[chain]
     const token0 = new Token(chain, _token0.address, _token0.tokenDecimal)
+    let [tokenA, tokenB] = token0.sortsBefore(token1) ? [token0, token1] : [token1, token0]
     console.log({_token0, net, chain, cc: ChainId.GÖRLI}, "===========")
-    const pair = await Fetcher.fetchPairData(token0, token1, signer)
+
+    const _pair = getPairAddress(token0, token1)
+    const pairContract = new ethers.Contract(_pair, pairABI.abi, signer);
+    const reserves = await pairContract.getReserves()
+    console.log({reserves})
+    const pair = chain === 97
+      ? new Pair(new TokenAmount(tokenA, reserves[0].toString()), new TokenAmount(tokenB,reserves[1].toString()))
+      : await Fetcher.fetchPairData(token0, token1, signer)
     const route = new Route([pair], token0, token1)
     return {route, token0}
   }
@@ -340,7 +351,8 @@ const _getTrade = (route, token0) => async (amount: string) => {
 
 const netChain = {
   goerli: ChainId.GÖRLI,
-  kovan: ChainId.KOVAN
+  kovan: ChainId.KOVAN,
+  binance: 97
 }
 
 const strToChainId = (net: string) => {
@@ -361,6 +373,23 @@ function buildCreate2Address(creatorAddress, saltHex, byteCode) {
 function calcSalt(sender, index) {
   return ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [sender, index])
+  );
+}
+
+const getPairAddress = (tokenA, tokenB) => {
+  [tokenA, tokenB] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
+  console.log(tokenA, tokenB)
+  const addr = ethers.utils.getCreate2Address(
+      "0x79323B74082e2E85493de93a16343b22e0EF20C6",
+      calcSaltEncodePacked(tokenA.address, tokenB.address),
+      "0xc6e62827f984fdebf683694fa4b7c4b12160000bea0804362b0ae37a6b9d4aaf"
+  )
+  return addr
+}
+
+function calcSaltEncodePacked(tokenA, tokenB) {
+  return ethers.utils.keccak256(
+    ethers.utils.concat([ethers.utils.arrayify(tokenA), ethers.utils.arrayify(tokenB)])
   );
 }
 
