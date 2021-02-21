@@ -4,12 +4,14 @@ Repository for the gasless wallet - Binance Hackathon
 # Project Summary
 Non-custodial EVM-compatible web wallet that supports gasless interactions.
 
-## Category
+## Binance Hackathon Requirements
+### Category
 DeFi and Asset Management
 
-## License: MIT
+### License 
+MIT
 
-## Smart Contract Addresses
+### Smart Contract Addresses
 - Wallet factory: 0xdB008C033085fA9Fb6EeaeB280A6C822850cce41
 
 - wallet spender: many e.g: 0x1a2986a47eee67fed5f7ff8a391b78b217450e93
@@ -22,7 +24,7 @@ DeFi and Asset Management
 
 - swapFunction: 0x8207accC5c25753d1654eC4C30A6516c65d742bE
 
-## Deployed uniswap on bsc
+### Deployed uniswap on bsc
 - UniswapV2Factory: 0x79323B74082e2E85493de93a16343b22e0EF20C6
 
 - UniswapV2Router02: 0xB3d040cDbDdb99cAEB8B25DB6dA9BD57E8310fb9
