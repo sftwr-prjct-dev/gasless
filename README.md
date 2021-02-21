@@ -40,6 +40,9 @@ DeFi and Asset Management
 ## Video Demo
 https://youtu.be/MimO5RpZH6M
 
+## Questions/Comments
+https://t.me/joinchat/Sa8T32X-VRPTHt0m
+
 ## Local development
 - start the local ganache client by running `npm run start:ganache`
 - start the local gsn relay server by runnugn `npm run start:local-gsn`
