@@ -35,6 +35,7 @@ DeFi and Asset Management
 - Powered by OpenGSN
 
 ## How it works
+![image](https://user-images.githubusercontent.com/50963972/108628588-d7ec4980-7429-11eb-8c63-8d8b67b8852a.png)
 
 ## Video Demo
 https://youtu.be/MimO5RpZH6M
