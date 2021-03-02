@@ -1,5 +1,5 @@
 # Gasless Wallet
-Repository for the gasless wallet - Binance Hackathon
+Repository for the gasless wallet
 
 # Project Summary
 Non-custodial EVM-compatible web wallet that supports gasless interactions.
