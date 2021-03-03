@@ -1,4 +1,4 @@
-# Gasless Wallet
+# ZeroSpender - Gasless Wallet
 Repository for the gasless wallet
 
 # Project Summary
